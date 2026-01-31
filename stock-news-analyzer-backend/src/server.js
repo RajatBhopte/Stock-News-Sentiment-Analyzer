@@ -1,29 +1,26 @@
 import app from "./app.js";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js"; // Corrected: default import
-import initializeScheduler from "./jobs/cron.news.js";
+import initializeScheduler from "./jobs/schedular.js";
 import runNewsFetchJob from "./jobs/fetchNews.job.js";
 import runSentimentJob from "./jobs/sentiment.job.js";
+import runAggregatorJob from "./jobs/aggregator.job.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-connectDB()
-  .then(async () => {
-    // 1. Start the Express Server
-    app.listen(PORT, () => {
-      console.log(`✅ Server is running on port http://localhost:${PORT}`);
-    });
+connectDB().then(async () => {
+  // Start Express
+  app.listen(PORT, () => console.log(`🚀 Server: http://localhost:${PORT}`));
 
-    // 2. Optional: Run an initial fetch immediately on startup
-    console.log("🚀 Triggering initial news fetch...");
-    await runNewsFetchJob();
+  // Start Cron Jobs
+  initializeScheduler();
 
-    await runSentimentJob();
-
-    initializeScheduler();
-
-  })
-  .catch((error) => {
-    console.error("❌ Failed to start server:", error);
-  });
+  // PRO TIP: Run an initial fetch immediately once so you don't wait 30 mins
+  console.log("🚀 Running initial startup fetch...");
+  await runNewsFetchJob();
+  await runSentimentJob();
+  await runAggregatorJob();
+}).catch((err) => {
+  console.error("Failed to start server:", err);
+});

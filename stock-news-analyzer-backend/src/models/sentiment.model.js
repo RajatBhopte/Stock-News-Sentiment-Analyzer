@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const sentimentSchema = new mongoose.Schema(
   {
@@ -36,4 +36,4 @@ const sentimentSchema = new mongoose.Schema(
 // This ensures we never have two records for TCS on 2026-01-31
 sentimentSchema.index({ stock: 1, date: 1 }, { unique: true });
 
-module.exports = mongoose.model("Sentiment", sentimentSchema);
+export default mongoose.model("Sentiment", sentimentSchema);
