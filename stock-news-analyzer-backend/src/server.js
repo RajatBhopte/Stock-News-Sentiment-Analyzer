@@ -3,8 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js"; // Corrected: default import
 import initializeScheduler from "./jobs/cron.news.js";
 import runNewsFetchJob from "./jobs/fetchNews.job.js";
-
-
+import runSentimentJob from "./jobs/sentiment.job.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -19,6 +18,8 @@ connectDB()
     // 2. Optional: Run an initial fetch immediately on startup
     console.log("🚀 Triggering initial news fetch...");
     await runNewsFetchJob();
+
+    await runSentimentJob();
 
     initializeScheduler();
 
