@@ -1,6 +1,7 @@
 import RSSParser from "rss-parser";
 import News from "../models/news.model.js";
 import  generateHash  from "../utils/hash.js";
+import { cleanHeadline } from "./parser.services.js";
 
 const parser = new RSSParser();
 const fetchStockNews = async (stock) => {
@@ -20,11 +21,14 @@ const fetchStockNews = async (stock) => {
 
       // Check if this article already exists in DB
       const exists = await News.exists({ contentHash });
+      const rawTitle = item.title;
+      const cleanTitle = cleanHeadline(rawTitle);
+
 
       if (!exists) {
         newArticles.push({
           stock: stock._id,
-          title: item.title,
+          title: cleanTitle,
           url: item.link,
           source: item.source || "Google News",
           publishedAt: new Date(item.pubDate),
