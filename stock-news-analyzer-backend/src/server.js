@@ -1,9 +1,23 @@
-import app from './app.js';
-import dotenv from 'dotenv';    
+import app from "./app.js";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js"; // Corrected: default import
+import runNewsFetchJob from "./jobs/fetchNews.job.js"; // Corrected: added .js and named function
+
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;     
-app.listen(PORT, () => {
-  console.log(`Server is running on port http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
 
+connectDB()
+  .then(async () => {
+    // 1. Start the Express Server
+    app.listen(PORT, () => {
+      console.log(`✅ Server is running on port http://localhost:${PORT}`);
+    });
+
+    // 2. Optional: Run an initial fetch immediately on startup
+    console.log("🚀 Triggering initial news fetch...");
+    await runNewsFetchJob();
+  })
+  .catch((error) => {
+    console.error("❌ Failed to start server:", error);
+  });
