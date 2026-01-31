@@ -1,7 +1,9 @@
 import app from "./app.js";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js"; // Corrected: default import
-import runNewsFetchJob from "./jobs/fetchNews.job.js"; // Corrected: added .js and named function
+import initializeScheduler from "./jobs/cron.news.js";
+import runNewsFetchJob from "./jobs/fetchNews.job.js";
+
 
 dotenv.config();
 
@@ -17,6 +19,9 @@ connectDB()
     // 2. Optional: Run an initial fetch immediately on startup
     console.log("🚀 Triggering initial news fetch...");
     await runNewsFetchJob();
+
+    initializeScheduler();
+
   })
   .catch((error) => {
     console.error("❌ Failed to start server:", error);
