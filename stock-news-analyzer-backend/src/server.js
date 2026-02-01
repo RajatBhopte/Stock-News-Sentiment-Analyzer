@@ -5,6 +5,7 @@ import initializeScheduler from "./jobs/schedular.js";
 import runNewsFetchJob from "./jobs/fetchNews.job.js";
 import runSentimentJob from "./jobs/sentiment.job.js";
 import runAggregatorJob from "./jobs/aggregator.job.js";
+import { backfillSevenDays } from "./scripts/backfill.js";
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,8 @@ connectDB().then(async () => {
   await runNewsFetchJob();
   await runSentimentJob();
   await runAggregatorJob();
+
+ await backfillSevenDays("697dc2fc0224a18255c77baf"); // Example Stock ID
 }).catch((err) => {
   console.error("Failed to start server:", err);
 });

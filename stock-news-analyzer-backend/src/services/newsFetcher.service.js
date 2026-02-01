@@ -7,7 +7,8 @@ const parser = new RSSParser();
 const fetchStockNews = async (stock) => {
   try {
     // Example: Google News RSS for the stock keyword
-    const FEED_URL = `https://news.google.com/rss/search?q=${encodeURIComponent(stock.keywords[0])}&hl=en-IN&gl=IN&ceid=IN:en`;
+    // Add '+when:7d' inside the query itself for fetching news 7 days old
+    const FEED_URL = `https://news.google.com/rss/search?q=${encodeURIComponent(stock.keywords[0] + " when:7d")}&hl=en-IN&gl=IN&ceid=IN:en`;
 
     const feed = await parser.parseURL(FEED_URL);
     console.log(
@@ -23,7 +24,6 @@ const fetchStockNews = async (stock) => {
       const exists = await News.exists({ contentHash });
       const rawTitle = item.title;
       const cleanTitle = cleanHeadline(rawTitle);
-
 
       if (!exists) {
         newArticles.push({

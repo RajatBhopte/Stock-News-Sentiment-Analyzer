@@ -1,5 +1,6 @@
 import News from "../models/news.model.js";
 import Sentiment from "../models/sentiment.model.js";
+import mongoose from "mongoose";
 
 // Configurable thresholds
 const BULLISH_THRESHOLD = 0.15;
@@ -18,15 +19,16 @@ const aggregateDailySentiment = async (stockId, dateString) => {
 
   try {
     // Calculate date range properly
+    const stockObjectId = new mongoose.Types.ObjectId(stockId);
+
     const startOfDay = new Date(`${dateString}T00:00:00.000Z`);
     const endOfDay = new Date(startOfDay);
     endOfDay.setDate(endOfDay.getDate() + 1);
 
-    // Use aggregation pipeline for better performance
     const results = await News.aggregate([
       {
         $match: {
-          stock: stockId,
+          stock: stockObjectId, // 3. Use the converted ObjectId here
           processed: true,
           publishedAt: {
             $gte: startOfDay,
