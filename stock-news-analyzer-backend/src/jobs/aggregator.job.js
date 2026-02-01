@@ -8,8 +8,14 @@ const runAggregatorJob = async () => {
   const stocks = await Stock.find({ isActive: true });
 
   for (const stock of stocks) {
-    await aggregateDailySentiment(stock._id, today);
+    try{
+        await aggregateDailySentiment(stock._id, today);
+    }catch(err){
+        console.error(`❌ Aggregation failed for stock ${stock.symbol}:`, err.message);
+    }
+
   }
+
 
   console.log("--- Aggregation Job Completed ---");
 };
