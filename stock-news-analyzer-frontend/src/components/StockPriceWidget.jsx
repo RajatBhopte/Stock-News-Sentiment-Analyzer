@@ -3,49 +3,70 @@ import { useState, useEffect } from "react";
 const StockPriceWidget = ({ symbol }) => {
   const [stockData, setStockData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Simulate API call delay
-    setTimeout(() => {
-      // Mock realistic data - you can update these values
-      const mockData = {
-        companyName: "Tata Consultancy Services Ltd.",
-        lastPrice: 4235.5 + (Math.random() * 10 - 5), // Slight random variation
-        previousClose: 4198.2,
-        open: 4210.0,
-        dayHigh: 4248.75,
-        dayLow: 4205.3,
-      };
+    const fetchStockPrice = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      mockData.change = mockData.lastPrice - mockData.previousClose;
-      mockData.pChange = (mockData.change / mockData.previousClose) * 100;
+        // Call your backend API
+        const response = await fetch(
+          `http://localhost:5000/api/stock/price/${symbol}`,
+        );
 
-      setStockData(mockData);
-      setLoading(false);
-    }, 500);
+        if (!response.ok) {
+          throw new Error("Failed to fetch stock price");
+        }
 
-    // Simulate price updates every 10 seconds
-    const interval = setInterval(() => {
-      setStockData((prev) => {
-        if (!prev) return null;
-        const newPrice = prev.lastPrice + (Math.random() * 2 - 1);
-        return {
-          ...prev,
-          lastPrice: newPrice,
-          change: newPrice - prev.previousClose,
-          pChange: ((newPrice - prev.previousClose) / prev.previousClose) * 100,
-        };
-      });
-    }, 10000);
+        const data = await response.json();
+        setStockData(data);
+      } catch (err) {
+        console.error("Stock price fetch error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    return () => clearInterval(interval);
+    if (symbol) {
+      fetchStockPrice();
+
+      // Refresh every 60 seconds
+      const interval = setInterval(fetchStockPrice, 60000);
+
+      return () => clearInterval(interval);
+    }
   }, [symbol]);
 
-  if (loading) {
+  if (loading && !stockData) {
     return (
       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 animate-pulse">
         <div className="h-8 bg-blue-200 rounded w-1/3 mb-3"></div>
-        <div className="h-12 bg-blue-200 rounded w-1/2"></div>
+        <div className="h-12 bg-blue-200 rounded w-1/2 mb-2"></div>
+        <div className="h-4 bg-blue-200 rounded w-1/4"></div>
+      </div>
+    );
+  }
+
+  if (error && !stockData) {
+    return (
+      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-xl p-6">
+        <div className="flex items-start gap-3">
+          <span className="text-3xl">⚠️</span>
+          <div>
+            <p className="text-yellow-900 font-bold text-lg">
+              Live Price Unavailable
+            </p>
+            <p className="text-yellow-700 text-sm mt-1">
+              Unable to fetch real-time price for {symbol}
+            </p>
+            <p className="text-yellow-600 text-xs mt-2">
+              Market may be closed or data temporarily unavailable
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -76,8 +97,8 @@ const StockPriceWidget = ({ symbol }) => {
               <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">
                 {stockData.companyName}
               </h2>
-              <span className="px-3 py-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
-                DEMO MODE
+              <span className="px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
+                LIVE
               </span>
             </div>
 
@@ -106,7 +127,11 @@ const StockPriceWidget = ({ symbol }) => {
             </div>
 
             <p className="text-sm text-gray-600 mt-3 font-medium">
-              📍 Simulated data • Updates every 10s
+              📡 Live from NSE • Last updated:{" "}
+              {new Date().toLocaleTimeString("en-IN", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
             </p>
           </div>
 
@@ -116,7 +141,7 @@ const StockPriceWidget = ({ symbol }) => {
                 Open
               </p>
               <p className="text-gray-900 font-bold text-lg mt-1">
-                ₹{stockData.open.toFixed(2)}
+                ₹{parseFloat(stockData.open).toFixed(2)}
               </p>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border-2 border-gray-200 min-w-[110px]">
@@ -124,7 +149,7 @@ const StockPriceWidget = ({ symbol }) => {
                 Prev Close
               </p>
               <p className="text-gray-900 font-bold text-lg mt-1">
-                ₹{stockData.previousClose.toFixed(2)}
+                ₹{parseFloat(stockData.previousClose).toFixed(2)}
               </p>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border-2 border-green-200 min-w-[110px]">
@@ -132,7 +157,7 @@ const StockPriceWidget = ({ symbol }) => {
                 Day High
               </p>
               <p className="text-green-800 font-bold text-lg mt-1">
-                ₹{stockData.dayHigh.toFixed(2)}
+                ₹{parseFloat(stockData.dayHigh).toFixed(2)}
               </p>
             </div>
             <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 border-2 border-red-200 min-w-[110px]">
@@ -140,19 +165,21 @@ const StockPriceWidget = ({ symbol }) => {
                 Day Low
               </p>
               <p className="text-red-800 font-bold text-lg mt-1">
-                ₹{stockData.dayLow.toFixed(2)}
+                ₹{parseFloat(stockData.dayLow).toFixed(2)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t-2 border-gray-300 flex items-center justify-between">
+        <div className="mt-4 pt-4 border-t-2 border-gray-300 flex items-center justify-between flex-wrap gap-2">
           <span className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-bold">
             NSE: {symbol}
           </span>
-          <span className="text-xs text-gray-600 font-medium">
-
-          </span>
+          {stockData.volume > 0 && (
+            <span className="text-xs text-gray-700 font-semibold">
+              Volume: {stockData.volume.toLocaleString("en-IN")}
+            </span>
+          )}
         </div>
       </div>
     </div>

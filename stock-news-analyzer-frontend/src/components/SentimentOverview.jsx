@@ -30,12 +30,12 @@ const SentimentOverview = ({ stockId }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div className={`border-2 rounded-lg p-4 ${getLabelColor()}`}>
-        <p className="text-sm font-medium uppercase">Market Mood</p>
+        <p className="text-sm font-medium uppercase">Today Market Mood</p>
         <p className="text-3xl font-bold mt-2">{label}</p>
       </div>
 
       <div className="border rounded-lg p-4">
-        <p className="text-sm text-gray-600">Avg Sentiment Score</p>
+        <p className="text-sm text-gray-600">Today Sentiment Score</p>
         <p
           className={`text-3xl font-bold mt-2 ${averageScore >= 0 ? "text-green-600" : "text-red-600"}`}
         >
@@ -44,12 +44,12 @@ const SentimentOverview = ({ stockId }) => {
       </div>
 
       <div className="border rounded-lg p-4">
-        <p className="text-sm text-gray-600">Articles Analyzed</p>
+        <p className="text-sm text-gray-600">Today Articles Analyzed</p>
         <p className="text-3xl font-bold mt-2">{articleCount}</p>
       </div>
 
       <div className="border rounded-lg p-4">
-        <p className="text-sm text-gray-600 mb-2">Distribution</p>
+        <p className="text-sm text-gray-600 mb-2">Today Distribution</p>
         <div className="space-y-1 text-sm">
           <div className="flex justify-between">
             <span>Positive</span>

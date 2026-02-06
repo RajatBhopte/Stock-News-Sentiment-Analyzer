@@ -13,28 +13,28 @@ const StockSearch = ({ onStockSelect, currentStock }) => {
       ticker: "TCS",
     },
     {
-      id: "697dc2fc0224a18255c77bb0", // You need to add these stocks to your backend
+      id: "6985df3775e96d05f9d825e3", // You need to add these stocks to your backend
+      name: "HCL Technologies",
+      symbol: "HCLTECH",
+      ticker: "HCLTECH",
+    },
+    {
+      id: "6985df0475e96d05f9d825de",
       name: "Infosys",
       symbol: "INFY",
       ticker: "INFY",
     },
     {
-      id: "697dc2fc0224a18255c77bb1",
-      name: "Reliance Industries",
-      symbol: "RELIANCE",
-      ticker: "RELIANCE",
+      id: "6985df4375e96d05f9d825e5",
+      name: "Tech Mahindra",
+      symbol: "TECHM",
+      ticker: "TECHM",
     },
     {
-      id: "697dc2fc0224a18255c77bb2",
-      name: "HDFC Bank",
-      symbol: "HDFCBANK",
-      ticker: "HDFCBANK",
-    },
-    {
-      id: "697dc2fc0224a18255c77bb3",
-      name: "Tata Motors",
-      symbol: "TATAMOTORS",
-      ticker: "TATAMOTORS",
+      id: "6985df2875e96d05f9d825e1",
+      name: "Wipro",
+      symbol: "WIPRO",
+      ticker: "WIPRO",
     },
   ];
 

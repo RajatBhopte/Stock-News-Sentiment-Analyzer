@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { stockAPI } from "../services/api";
 
-const SentimentTrendChart = ({ stockId }) => {
+const SentimentTrendChart = ({ stockId, onDateSelect }) => {
   const [trendData, setTrendData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(7);
@@ -33,6 +33,12 @@ const SentimentTrendChart = ({ stockId }) => {
 
     if (stockId) fetchTrend();
   }, [stockId, timeRange]);
+
+  const handleDotClick = (date) => {
+    if (onDateSelect) {
+      onDateSelect(date);
+    }
+  };
 
   if (loading) {
     return (
@@ -75,6 +81,21 @@ const SentimentTrendChart = ({ stockId }) => {
     }))
     .sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
 
+  // --- NEW: Calculate the gradient offset ---
+  // This determines where the Green turns into Red on the Y-axis
+  const gradientOffset = () => {
+    const dataMax = Math.max(...chartData.map((i) => i.score));
+    const dataMin = Math.min(...chartData.map((i) => i.score));
+
+    if (dataMax <= 0) return 0;
+    if (dataMin >= 0) return 1;
+
+    return dataMax / (dataMax - dataMin);
+  };
+
+  const off = gradientOffset();
+  // ------------------------------------------
+
   const avgSentiment =
     trendData.data.reduce((sum, d) => sum + d.averageScore, 0) /
     trendData.count;
@@ -99,7 +120,9 @@ const SentimentTrendChart = ({ stockId }) => {
         <div className="bg-white p-4 border-2 border-gray-300 rounded-xl shadow-2xl">
           <p className="font-bold text-gray-900 text-base mb-2">{data.date}</p>
           <p
-            className={`text-2xl font-bold mb-2 ${data.score >= 0 ? "text-green-600" : "text-red-600"}`}
+            className={`text-2xl font-bold mb-2 ${
+              data.score >= 0 ? "text-green-600" : "text-red-600"
+            }`}
           >
             {data.score > 0 ? "+" : ""}
             {data.score.toFixed(3)}
@@ -135,10 +158,41 @@ const SentimentTrendChart = ({ stockId }) => {
               <span className="font-bold text-gray-800">{data.neutral}</span>
             </div>
           </div>
+          <p className="text-xs text-blue-600 font-bold mt-3 text-center">
+            👆 Click dot to view news
+          </p>
         </div>
       );
     }
     return null;
+  };
+
+  const CustomDot = (props) => {
+    const { cx, cy, payload } = props;
+    // Determine color based on individual score
+    const color = payload.score >= 0 ? "#16a34a" : "#dc2626"; // green-600 : red-600
+
+    return (
+      <circle
+        cx={cx}
+        cy={cy}
+        r={6}
+        fill={color}
+        stroke="#fff"
+        strokeWidth={2}
+        style={{ cursor: "pointer" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleDotClick(payload.fullDate);
+        }}
+        onMouseEnter={(e) => {
+          e.target.setAttribute("r", 8);
+        }}
+        onMouseLeave={(e) => {
+          e.target.setAttribute("r", 6);
+        }}
+      />
+    );
   };
 
   return (
@@ -176,9 +230,15 @@ const SentimentTrendChart = ({ stockId }) => {
             margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#2563eb" stopOpacity={0.1} />
+              {/* Split Gradient for the FILL (Area) */}
+              <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                <stop offset={off} stopColor="#16a34a" stopOpacity={0.3} />
+                <stop offset={off} stopColor="#dc2626" stopOpacity={0.3} />
+              </linearGradient>
+              {/* Split Gradient for the STROKE (Line) */}
+              <linearGradient id="splitStroke" x1="0" y1="0" x2="0" y2="1">
+                <stop offset={off} stopColor="#16a34a" stopOpacity={1} />
+                <stop offset={off} stopColor="#dc2626" stopOpacity={1} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -187,8 +247,8 @@ const SentimentTrendChart = ({ stockId }) => {
               tick={{ fontSize: 12, fontWeight: 600 }}
               stroke="#6b7280"
             />
+            {/* Removed fixed domain to let chart auto-scale, making the 0-line dynamic */}
             <YAxis
-              domain={[-1, 1]}
               tick={{ fontSize: 12, fontWeight: 600 }}
               stroke="#6b7280"
               tickFormatter={(value) => value.toFixed(1)}
@@ -217,16 +277,11 @@ const SentimentTrendChart = ({ stockId }) => {
             <Area
               type="monotone"
               dataKey="score"
-              stroke="#2563eb"
+              stroke="url(#splitStroke)" // Uses the split gradient for line
               strokeWidth={3}
-              fill="url(#colorScore)"
-              dot={{ fill: "#2563eb", strokeWidth: 2, r: 5 }}
-              activeDot={{
-                r: 7,
-                fill: "#1e40af",
-                stroke: "#fff",
-                strokeWidth: 2,
-              }}
+              fill="url(#splitColor)" // Uses the split gradient for fill
+              dot={<CustomDot />}
+              activeDot={false}
             />
             <YAxis
               yAxisId="right"
@@ -236,6 +291,10 @@ const SentimentTrendChart = ({ stockId }) => {
             />
           </ComposedChart>
         </ResponsiveContainer>
+
+        <p className="text-center text-sm text-gray-600 mt-3 font-medium">
+          💡 Click any dot on the chart to view news from that day
+        </p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -273,7 +332,9 @@ const SentimentTrendChart = ({ stockId }) => {
             Avg Score
           </p>
           <p
-            className={`text-4xl font-bold mt-2 ${avgSentiment >= 0 ? "text-green-600" : "text-red-600"}`}
+            className={`text-4xl font-bold mt-2 ${
+              avgSentiment >= 0 ? "text-green-600" : "text-red-600"
+            }`}
           >
             {avgSentiment > 0 ? "+" : ""}
             {avgSentiment.toFixed(2)}
