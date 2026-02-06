@@ -3,6 +3,7 @@ import sentimentRoutes from './routes/sentiment.routes.js';
 import newsRoutes from './routes/news.routes.js';
 import cors from "cors"; // Import CORS middleware
 import stockRoutes from "./routes/stockRoutes.js"; // Import stock routes
+import pastPriceRoutes from "./routes/pastprice.routes.js"; // Import past price routes
 import News from "./models/news.model.js"; // Import News model for news by date route
 import mongoose from "mongoose"; // Import mongoose for ObjectId conversion
 import axios from 'axios';
@@ -130,6 +131,7 @@ app.listen(PORT, () => {
 app.use('/api/sentiment', sentimentRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/stocks", stockRoutes);
+app.use("/api/stock", pastPriceRoutes); // Add past price route
 
 
 export default app;
