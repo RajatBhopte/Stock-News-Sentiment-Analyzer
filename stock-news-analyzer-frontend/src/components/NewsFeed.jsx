@@ -44,6 +44,7 @@ const NewsFeed = ({ stockId }) => {
 
     if (stockId) {
       fetchNews();
+      // Auto-refresh every 5 minutes
       const interval = setInterval(fetchNews, 300000);
       return () => clearInterval(interval);
     }
@@ -86,7 +87,7 @@ const NewsFeed = ({ stockId }) => {
   }
 
   return (
-    <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+    <div className="space-y-3">
       {news.map((article) => (
         <div
           key={article._id}

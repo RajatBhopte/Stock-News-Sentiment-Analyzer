@@ -4,6 +4,15 @@
   padding: 2rem;
   text-align: center;
 }
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  
+  .dark {
+    color-scheme: dark;
+  }
+}
 
 .logo {
   height: 6em;

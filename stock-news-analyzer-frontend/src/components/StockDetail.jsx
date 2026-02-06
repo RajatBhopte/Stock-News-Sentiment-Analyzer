@@ -45,6 +45,7 @@ const StockDetail = ({ stockId, stockName, stockSymbol }) => {
                 <SentimentTrendChart
                   stockId={stockId}
                   onDateSelect={handleDateSelect}
+                  
                 />
               </div>
             </div>
