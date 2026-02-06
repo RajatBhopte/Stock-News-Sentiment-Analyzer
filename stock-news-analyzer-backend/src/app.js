@@ -5,6 +5,7 @@ import cors from "cors"; // Import CORS middleware
 import stockRoutes from "./routes/stockRoutes.js"; // Import stock routes
 import News from "./models/news.model.js"; // Import News model for news by date route
 import mongoose from "mongoose"; // Import mongoose for ObjectId conversion
+import axios from 'axios';
 
 const app = express();
 
@@ -73,6 +74,56 @@ app.get("/api/news/date/:stockId/:date", async (req, res) => {
       message: error.message,
     });
   }
+});
+
+// to get real time indices data  
+app.get("/api/indices", async (req, res) => {
+  try {
+    const symbols = {
+      nifty50: "^NSEI",
+      niftyIT: "^CNXIT",
+      bankNifty: "^NSEBANK",
+      sensex: "^BSESN",
+    };
+
+    const results = await Promise.all(
+      Object.entries(symbols).map(async ([key, symbol]) => {
+        try {
+          const response = await axios.get(
+            `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`,
+            {
+              params: { interval: "1m", range: "1d" },
+            },
+          );
+
+          const meta = response.data.chart.result[0].meta;
+          const currentPrice = meta.regularMarketPrice;
+          const previousClose = meta.chartPreviousClose;
+          const change = currentPrice - previousClose;
+          const changePercent = (change / previousClose) * 100;
+
+          return {
+            name: key,
+            value: currentPrice,
+            change,
+            changePercent,
+          };
+        } catch (error) {
+          console.error(`Error fetching ${key}:`, error.message);
+          return null;
+        }
+      }),
+    );
+
+    res.json(results.filter(Boolean));
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch indices" });
+  }
+});
+
+const PORT = 3001;
+app.listen(PORT, () => {
+  console.log(`Proxy server running on http://localhost:${PORT}`);
 });
 
 
