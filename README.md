@@ -10,6 +10,8 @@ Aggregates sentiment per stock per day
 
 Displays sentiment trends visually on a dashboard
 
+User Can compare sentiment with price chart of stock
+
 Helps users understand market mood before making decisions
 
 The system converts unstructured news text into structured sentiment intelligence.
