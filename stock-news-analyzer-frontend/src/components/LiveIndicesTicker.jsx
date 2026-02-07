@@ -1,59 +1,28 @@
+
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 const SlimIndicesTicker = () => {
-  const [indices, setIndices] = useState([
-    {
-      name: "NIFTY 50",
-      baseValue: 22485.1,
-      value: 22485.1,
-      change: 0,
-      changePercent: 0,
-    },
-    {
-      name: "NIFTY IT",
-      baseValue: 35420.5,
-      value: 35420.5,
-      change: 0,
-      changePercent: 0,
-    },
-    {
-      name: "BANK NIFTY",
-      baseValue: 48190.3,
-      value: 48190.3,
-      change: 0,
-      changePercent: 0,
-    },
-    {
-      name: "SENSEX",
-      baseValue: 74280.45,
-      value: 74280.45,
-      change: 0,
-      changePercent: 0,
-    },
-  ]);
+  const [indices, setIndices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const updateIndices = () => {
-      setIndices((prev) =>
-        prev.map((index) => {
-          const randomChange = (Math.random() - 0.5) * 0.01;
-          const newValue = index.baseValue * (1 + randomChange);
-          const change = newValue - index.baseValue;
-          const changePercent = (change / index.baseValue) * 100;
-
-          return {
-            ...index,
-            value: newValue,
-            change,
-            changePercent,
-          };
-        }),
-      );
+    const fetchIndices = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/indices");
+        if (!response.ok) throw new Error("Failed to fetch data");
+        const data = await response.json();
+        setIndices(data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
     };
 
-    updateIndices();
-    const interval = setInterval(updateIndices, 2000); // Updates every 2 seconds
+    fetchIndices();
+    const interval = setInterval(fetchIndices, 10000); // Update every 10 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -96,27 +65,27 @@ const SlimIndicesTicker = () => {
     );
   };
 
+  if (loading)
+    return <div className="py-3 text-center">Loading market data...</div>;
+  if (error)
+    return <div className="py-3 text-center text-red-600">Error: {error}</div>;
+
   return (
     <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b-2 border-gray-200 shadow-md overflow-hidden">
       <div className="relative py-3">
-        {/* Scrolling animation */}
         <div className="flex animate-scroll">
-          {/* First set of indices */}
           {indices.map((index, idx) => (
             <IndexItem key={`first-${idx}`} data={index} />
           ))}
-          {/* Duplicate for seamless loop */}
           {indices.map((index, idx) => (
             <IndexItem key={`second-${idx}`} data={index} />
           ))}
-          {/* Another duplicate for smooth continuous scroll */}
           {indices.map((index, idx) => (
             <IndexItem key={`third-${idx}`} data={index} />
           ))}
         </div>
       </div>
 
-      {/* Add this to your global CSS or index.css */}
       <style jsx>{`
         @keyframes scroll {
           0% {
@@ -126,11 +95,9 @@ const SlimIndicesTicker = () => {
             transform: translateX(-33.333%);
           }
         }
-
         .animate-scroll {
           animation: scroll 20s linear infinite;
         }
-
         .animate-scroll:hover {
           animation-play-state: paused;
         }
