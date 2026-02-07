@@ -7,6 +7,7 @@ import pastPriceRoutes from "./routes/pastprice.routes.js"; // Import past price
 import News from "./models/news.model.js"; // Import News model for news by date route
 import mongoose from "mongoose"; // Import mongoose for ObjectId conversion
 import axios from 'axios';
+import indicesRoutes from "./routes/indicesRoutes.js"; // Import indices routes
 
 const app = express();
 
@@ -134,6 +135,7 @@ app.listen(PORT, () => {
 });
 
 
+app.use("/api/indices", indicesRoutes);
 app.use('/api/sentiment', sentimentRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/stocks", stockRoutes);
