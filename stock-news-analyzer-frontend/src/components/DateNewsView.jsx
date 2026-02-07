@@ -1,3 +1,4 @@
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 import { useState, useEffect } from "react";
 
 const DateNewsView = ({ stockId, selectedDate, onClose }) => {
@@ -18,7 +19,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
           formattedDate = selectedDate.split("T")[0];
         }
 
-        const url = `http://localhost:5000/api/news/date/${stockId}/${formattedDate}`;
+        const url = `${BASE_URL}/api/news/date/${stockId}/${formattedDate}`;
         console.log("Fetching from:", url);
 
         const response = await fetch(url);

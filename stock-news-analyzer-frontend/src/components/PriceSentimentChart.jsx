@@ -1,3 +1,4 @@
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 import { useState, useEffect } from "react";
 import {
   ComposedChart,
@@ -21,7 +22,7 @@ const PriceSentimentChart = ({ stockId }) => {
       try {
         setLoading(true);
         const response = await fetch(
-          `http://localhost:5000/api/stock/price-sentiment/${stockId}?days=${timeRange}`,
+          `${BASE_URL}/api/stock/price-sentiment/${stockId}?days=${timeRange}`,
         );
         const result = await response.json();
 
