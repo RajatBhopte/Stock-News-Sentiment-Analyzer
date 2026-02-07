@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
-
+const BASE_URL = import.meta.env.VITE_API_URL
 const SlimIndicesTicker = () => {
   const [indices, setIndices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +10,7 @@ const SlimIndicesTicker = () => {
   useEffect(() => {
     const fetchIndices = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/indices");
+        const response = await fetch(`${BASE_URL}/api/indices`);
         if (!response.ok) throw new Error("Failed to fetch data");
         const data = await response.json();
         setIndices(data);
