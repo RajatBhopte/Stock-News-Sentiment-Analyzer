@@ -71,11 +71,11 @@ connectDB().then(async () => {
   await runSentimentJob();
   await runAggregatorJob();
 
- await backfillSevenDays("697dc2fc0224a18255c77baf"); // Example Stock ID TCS
- await backfillSevenDays("6985df0475e96d05f9d825de"); // Example Stock ID INFY
- await backfillSevenDays("6985df4375e96d05f9d825e5"); // Example Stock ID TECH Mahindra
- await backfillSevenDays("6985df2875e96d05f9d825e1"); // Example Stock ID Wipro
- await backfillSevenDays("6985df3775e96d05f9d825e3"); // Example Stock ID  HCL
+//  await backfillSevenDays("697dc2fc0224a18255c77baf"); // Example Stock ID TCS
+//  await backfillSevenDays("6985df0475e96d05f9d825de"); // Example Stock ID INFY
+//  await backfillSevenDays("6985df4375e96d05f9d825e5"); // Example Stock ID TECH Mahindra
+//  await backfillSevenDays("6985df2875e96d05f9d825e1"); // Example Stock ID Wipro
+//  await backfillSevenDays("6985df3775e96d05f9d825e3"); // Example Stock ID  HCL
 
 }).catch((err) => {
   console.error("Failed to start server:", err);
