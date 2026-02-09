@@ -15,3 +15,10 @@ User Can compare sentiment with price chart of stock
 Helps users understand market mood before making decisions
 
 The system converts unstructured news text into structured sentiment intelligence.
+
+Future Feature Scope
+
+** Integrating machine learning model to predict the stock price **
+
+Use past history of stock price and sentiment analyze to predict stock price
+
