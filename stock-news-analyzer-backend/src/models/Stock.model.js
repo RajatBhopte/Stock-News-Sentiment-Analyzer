@@ -12,6 +12,7 @@ const stockSchema = new mongoose.Schema(
     },
     name: { type: String, required: true },
     keywords: [{ type: String }], // Keywords for RSS/API searching
+    sector: { type: String, default: "Others" },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true },

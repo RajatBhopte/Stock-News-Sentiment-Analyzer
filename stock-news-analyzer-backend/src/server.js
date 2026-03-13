@@ -8,6 +8,8 @@ import runAggregatorJob from "./jobs/aggregator.job.js";
 import { backfillSevenDays } from "./scripts/backfill.js";
 import axios from "axios";
 dotenv.config();
+import dns from "node:dns";
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const PORT = process.env.PORT || 5000;
 

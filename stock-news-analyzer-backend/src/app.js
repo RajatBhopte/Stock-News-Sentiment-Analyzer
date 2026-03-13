@@ -8,6 +8,8 @@ import News from "./models/news.model.js"; // Import News model for news by date
 import mongoose from "mongoose"; // Import mongoose for ObjectId conversion
 import axios from 'axios';
 import indicesRoutes from "./routes/indicesRoutes.js"; // Import indices routes
+import aiRoutes from "./routes/ai.routes.js";
+import sectorRoutes from "./routes/sector.routes.js";
 
 const app = express();
 
@@ -129,17 +131,14 @@ app.get("/health", (req, res) => {
 });
 
 
-const PORT = 3001;
-app.listen(PORT, () => {
-  console.log(`Proxy server running on http://localhost:${PORT}`);
-});
-
 
 app.use("/api/indices", indicesRoutes);
 app.use('/api/sentiment', sentimentRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/stocks", stockRoutes);
 app.use("/api/stock", pastPriceRoutes); // Add past price route
+app.use("/api/ai", aiRoutes);
+app.use("/api/sectors", sectorRoutes);
 
 
 export default app;
