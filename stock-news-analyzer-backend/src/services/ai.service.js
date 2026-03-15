@@ -20,7 +20,7 @@ export const generateStockSummary = async (stockName, newsArticles) => {
       .join("\n\n");
 
     const prompt = `
-      You are a senior financial analyst. Analyze news for ${stockName} and provide a structured "Market Pulse" summary.
+      You are a senior financial analyst. Analyze news for ${stockName} and provide a structured "BULLBEAR" summary.
       
       Requirements:
       1. Provide exactly 3 short, impactful bullet points.

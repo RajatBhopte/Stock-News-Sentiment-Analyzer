@@ -49,7 +49,7 @@ const LandingPage = () => {
             <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
               <TrendingUp className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-black tracking-tighter">STOCK<span className="text-blue-500">PULSE</span></span>
+            <span className="text-xl font-black tracking-tighter">BULL<span className="text-blue-500">BEAR</span></span>
           </div>
           <Link 
             to="/dashboard"
@@ -153,7 +153,7 @@ const LandingPage = () => {
                 <div className="p-3 bg-white/20 rounded-2xl w-fit mb-6">
                   <Bot className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-black mb-2">Market Pulse AI</h3>
+                <h3 className="text-2xl font-black mb-2">BULLBEAR AI</h3>
                 <p className="text-blue-100/80 font-medium max-w-sm">Compress 1,000+ news articles into 3 impactful bullet points. Real-time intelligence at scale.</p>
               </div>
               <div className="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -223,7 +223,7 @@ const LandingPage = () => {
             </Link>
           </div>
           <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest">© 2026 STOCKPULSE AI TERMINAL v2.1</div>
+            <div className="text-[10px] font-black text-gray-600 uppercase tracking-widest">© 2026 BULLBEAR AI TERMINAL v2.1</div>
             <div className="flex gap-6">
               <span className="text-[10px] font-bold text-gray-500 hover:text-white cursor-pointer uppercase tracking-widest">Twitter</span>
               <span className="text-[10px] font-bold text-gray-500 hover:text-white cursor-pointer uppercase tracking-widest">Discord</span>

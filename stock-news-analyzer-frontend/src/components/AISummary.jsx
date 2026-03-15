@@ -81,7 +81,7 @@ const AISummary = ({ stockId }) => {
             <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">Market Pulse AI</h3>
+            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">BULLBEAR AI</h3>
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Real-time analysis</p>
           </div>
         </div>

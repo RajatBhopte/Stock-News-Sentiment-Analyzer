@@ -29,7 +29,7 @@ function Dashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-4 max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
           <div className="flex-1 w-full">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-              Stock Sentiment Analyzer
+              BullBear
             </h2>
             <StockSearch onStockSelect={handleStockSelect} />
           </div>

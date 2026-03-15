@@ -78,7 +78,7 @@ const SectorHeatmap = ({ standalone = true, onStockSelect }) => {
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
               <LayoutGrid className="w-6 h-6 text-blue-500" />
-              Market Pulse Heatmap
+              BULLBEAR Heatmap
             </h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm">Sentiment distribution across major industries</p>
           </div>

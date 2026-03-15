@@ -19,7 +19,7 @@ app.use(express.json()); // Middleware to parse JSON bodies
 
 
 app.get('/', (req, res) => {
-  res.send('Stock News Analyzer Backend is running');
+  res.send('BullBear Backend is running');
 });
 
 // In your backend routes
