@@ -4,6 +4,7 @@ import StockDetail from "./components/StockDetail";
 import StockSearch from "./components/StockSearch";
 import LiveIndicesTicker from "./components/LiveIndicesTicker";
 import SectorHeatmap from "./pages/SectorHeatmap";
+import LandingPage from "./pages/LandingPage";
 import { LayoutGrid } from "lucide-react";
 
 function Dashboard() {
@@ -54,7 +55,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/heatmap" element={<SectorHeatmap />} />
       </Routes>
     </BrowserRouter>
