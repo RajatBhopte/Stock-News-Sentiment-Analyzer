@@ -16,7 +16,9 @@ const AISummary = ({ stockId }) => {
       setData(response.data);
     } catch (err) {
       if (axios.isCancel(err)) return;
-      setError(err.response?.status === 429 ? "Limit reached." : "Fetch error.");
+      console.error("Summary Error:", err);
+      const message = err.response?.data?.message || (err.response?.status === 429 ? "AI is resting. Retry in a minute." : "Network or Fetch error.");
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -105,9 +107,17 @@ const AISummary = ({ stockId }) => {
               ))}
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <AlertCircle className="w-8 h-8 text-rose-500 mb-2" />
-              <p className="text-xs font-bold text-gray-500">{error}</p>
+            <div className="flex flex-col items-center justify-center py-8 text-center animate-in fade-in zoom-in duration-300">
+              <div className="p-3 bg-rose-50 dark:bg-rose-900/20 rounded-full mb-4">
+                <AlertCircle className="w-8 h-8 text-rose-500" />
+              </div>
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{error}</p>
+              <button 
+                onClick={() => fetchSummary()}
+                className="text-xs font-black text-blue-600 dark:text-blue-400 underline underline-offset-4 hover:text-blue-700 transition-colors"
+              >
+                Try Again Now
+              </button>
             </div>
           ) : bullets.length > 0 ? (
             <div className="space-y-5">

@@ -48,12 +48,13 @@ export const getStockAISummary = async (req, res) => {
 
     res.status(200).json(responseData);
   } catch (error) {
-    console.error("AI Controller Error:", error);
+    console.error("AI Summary Controller Error:", error);
     
     // Check if it's a rate limit error from Gemini
-    if (error.message.includes("429") || error.message.includes("Quota exceeded")) {
+    const errorMessage = error.message || "";
+    if (errorMessage.includes("429") || errorMessage.includes("Quota exceeded") || errorMessage.includes("too many requests")) {
       return res.status(429).json({ 
-        message: "AI service is currently busy. Please try again in a few minutes.",
+        message: "AI service is currently busy. Please try again in 60 seconds.",
         error: "Rate limit exceeded"
       });
     }
@@ -116,6 +117,16 @@ export const getStockPricePrediction = async (req, res) => {
     res.status(200).json(prediction);
   } catch (error) {
     console.error("Prediction Controller Error:", error);
+
+    // Check if it's a rate limit error from Gemini
+    const errorMessage = error.message || "";
+    if (errorMessage.includes("429") || errorMessage.includes("Quota exceeded") || errorMessage.includes("too many requests")) {
+      return res.status(429).json({ 
+        message: "AI analysis is currently paused due to high demand. Retry in a minute.",
+        error: "Rate limit exceeded"
+      });
+    }
+
     res.status(500).json({ message: "Error generating prediction", error: error.message });
   }
 };

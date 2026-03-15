@@ -16,7 +16,8 @@ const AIPrediction = ({ stockId }) => {
       setPrediction(response.data);
     } catch (err) {
       console.error("Prediction Error:", err);
-      setError("AI Forecast unavailable.");
+      const errMsg = err.response?.data?.message || "AI Forecast temporarily unavailable.";
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -78,9 +79,17 @@ const AIPrediction = ({ stockId }) => {
               <p className="text-sm font-medium text-gray-500 animate-pulse">Running Correlation Analysis...</p>
             </motion.div>
           ) : error ? (
-            <motion.div key="error" className="py-8 text-center">
-              <Info className="w-10 h-10 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
-              <p className="text-sm text-gray-500">{error}</p>
+            <motion.div key="error" className="py-8 text-center animate-in fade-in zoom-in duration-300">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-full w-fit mx-auto mb-4">
+                <Info className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+              </div>
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">{error}</p>
+              <button 
+                onClick={fetchPrediction}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
+              >
+                Request Analysis
+              </button>
             </motion.div>
           ) : prediction && (
             <motion.div 

@@ -67,11 +67,18 @@ connectDB().then(async () => {
   // Start Cron Jobs
   initializeScheduler();
 
-  // PRO TIP: Run an initial fetch immediately once so you don't wait 30 mins
-  console.log("🚀 Running initial startup fetch...");
-  await runNewsFetchJob();
-  await runSentimentJob();
-  await runAggregatorJob();
+  // PRO TIP: Run an initial fetch in the background so it doesn't block the server startup
+  (async () => {
+    try {
+      console.log("🚀 Starting background initial fetch...");
+      await runNewsFetchJob();
+      await runSentimentJob();
+      await runAggregatorJob();
+      console.log("✅ Initial startup tasks completed.");
+    } catch (err) {
+      console.error("❌ Background startup tasks failed:", err.message);
+    }
+  })();
 
 //  await backfillSevenDays("697dc2fc0224a18255c77baf"); // Example Stock ID TCS
 //  await backfillSevenDays("6985df0475e96d05f9d825de"); // Example Stock ID INFY
