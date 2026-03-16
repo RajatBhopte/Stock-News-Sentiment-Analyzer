@@ -62,7 +62,11 @@ app.get('/api/stock/price/:symbol', async (req, res) => {
 
 connectDB().then(async () => {
   // Start Express
-  app.listen(PORT, () => console.log(`🚀 Server: http://localhost:${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port: ${PORT}`);
+    console.log(`🔗 API Base URL: http://localhost:${PORT}`);
+    console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
+  });
 
   // Start Cron Jobs
   initializeScheduler();

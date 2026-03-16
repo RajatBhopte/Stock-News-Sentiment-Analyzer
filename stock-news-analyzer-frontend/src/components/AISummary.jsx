@@ -12,7 +12,7 @@ const AISummary = ({ stockId }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:5000/api/ai/summary/${stockId}`, { signal });
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/ai/summary/${stockId}`, { signal });
       setData(response.data);
     } catch (err) {
       if (axios.isCancel(err)) return;

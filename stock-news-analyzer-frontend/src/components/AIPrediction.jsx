@@ -8,13 +8,15 @@ const AIPrediction = ({ stockId }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchPrediction = async () => {
+  const fetchPrediction = async (signal = null) => {
+    if (!stockId) return;
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://localhost:5000/api/ai/predict/${stockId}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/ai/predict/${stockId}`, { signal });
       setPrediction(response.data);
     } catch (err) {
+      if (axios.isCancel(err)) return;
       console.error("Prediction Error:", err);
       const errMsg = err.response?.data?.message || "AI Forecast temporarily unavailable.";
       setError(errMsg);
@@ -24,7 +26,9 @@ const AIPrediction = ({ stockId }) => {
   };
 
   useEffect(() => {
-    if (stockId) fetchPrediction();
+    const controller = new AbortController();
+    fetchPrediction(controller.signal);
+    return () => controller.abort();
   }, [stockId]);
 
   const getDirectionInfo = (dir) => {
@@ -55,7 +59,7 @@ const AIPrediction = ({ stockId }) => {
             </div>
           </div>
           <button 
-            onClick={fetchPrediction} 
+            onClick={() => fetchPrediction()} 
             disabled={loading}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors disabled:opacity-50"
           >
@@ -85,7 +89,7 @@ const AIPrediction = ({ stockId }) => {
               </div>
               <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">{error}</p>
               <button 
-                onClick={fetchPrediction}
+                onClick={() => fetchPrediction()}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
               >
                 Request Analysis

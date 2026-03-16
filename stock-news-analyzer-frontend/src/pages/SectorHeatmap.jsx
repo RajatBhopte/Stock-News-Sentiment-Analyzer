@@ -11,7 +11,7 @@ const SectorHeatmap = ({ standalone = true, onStockSelect }) => {
   useEffect(() => {
     const fetchHeatmap = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/sectors/heatmap");
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/sectors/heatmap`);
         setSectors(response.data);
       } catch (error) {
         console.error("Error fetching heatmap:", error);
