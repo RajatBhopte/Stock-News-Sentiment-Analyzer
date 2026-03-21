@@ -23,22 +23,30 @@ const demoData = [
   { date: "Day 10", price: 1340, sentiment: -0.3 },
 ];
 
+const splitOffset = (() => {
+  const dataMax = Math.max(...demoData.map((i) => i.sentiment));
+  const dataMin = Math.min(...demoData.map((i) => i.sentiment));
+  if (dataMax <= 0) return 0;
+  if (dataMin >= 0) return 1;
+  return dataMax / (dataMax - dataMin);
+})();
+
 const LandingGraph = () => {
   return (
-    <div className="w-full h-full min-h-[300px] bg-white/70 dark:bg-black/60 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden transition-all duration-300">
-      <div className="flex items-center justify-between mb-8">
+    <div className="w-full h-full min-h-[300px] bg-white rounded-3xl p-4 sm:p-6 border border-gray-200 shadow-[0_20px_50px_rgba(0,0,0,0.15)] overflow-hidden transition-all duration-300">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
         <div>
-          <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">Live Correlation Engine</h4>
+          <h4 className="text-sm font-black text-gray-900 uppercase tracking-tighter">Live Correlation Engine</h4>
           <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest opacity-80">Sentiment vs Price Pulse</p>
         </div>
-        <div className="flex gap-6">
+        <div className="flex gap-4 sm:gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)]" />
-            <span className="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest">Price</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.6)]" />
+            <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest">Price</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
-            <span className="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest">Sentiment</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+            <span className="text-[10px] font-black text-gray-700 uppercase tracking-widest">Sentiment</span>
           </div>
         </div>
       </div>
@@ -47,17 +55,17 @@ const LandingGraph = () => {
         <AreaChart data={demoData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+              <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.2} />
+              <stop offset="95%" stopColor="#94a3b8" stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="colorSentiment" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+            <linearGradient id="splitColorSentiment" x1="0" y1="0" x2="0" y2="1">
+              <stop offset={splitOffset} stopColor="#10b981" stopOpacity={0.4} />
+              <stop offset={splitOffset} stopColor="#ef4444" stopOpacity={0.4} />
             </linearGradient>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
+            <linearGradient id="splitColorSentimentLine" x1="0" y1="0" x2="0" y2="1">
+              <stop offset={splitOffset} stopColor="#10b981" stopOpacity={1} />
+              <stop offset={splitOffset} stopColor="#ef4444" stopOpacity={1} />
+            </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" opacity={0.1} />
           <XAxis 
@@ -88,16 +96,16 @@ const LandingGraph = () => {
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 return (
-                  <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-4 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-2xl transform scale-105 transition-all">
-                    <p className="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-[0.2em]">{payload[0].payload.date}</p>
+                  <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-[0_10px_30px_rgba(0,0,0,0.1)] transform scale-105 transition-all">
+                    <p className="text-[10px] font-black text-gray-500 uppercase mb-3 tracking-[0.2em]">{payload[0].payload.date}</p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-[10px] uppercase font-bold text-gray-500">Price</span>
-                        <p className="text-sm font-black text-blue-500">₹{payload[0].value.toFixed(2)}</p>
+                        <p className="text-sm font-black text-slate-700">₹{payload[0].value.toFixed(2)}</p>
                       </div>
                       <div className="flex items-center justify-between gap-4">
                         <span className="text-[10px] uppercase font-bold text-gray-500">Sentiment</span>
-                        <p className={`text-sm font-black ${payload[1].value >= 0 ? "text-emerald-400" : "text-rose-500"}`}>
+                        <p className={`text-sm font-black ${payload[1].value >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
                           {(payload[1].value * 100).toFixed(0)}%
                         </p>
                       </div>
@@ -113,25 +121,23 @@ const LandingGraph = () => {
             yAxisId="price"
             type="monotone"
             dataKey="price"
-            stroke="#3b82f6"
-            strokeWidth={4}
+            stroke="#64748b"
+            strokeWidth={3}
             fillOpacity={1}
             fill="url(#colorPrice)"
             animationDuration={2000}
-            filter="url(#glow)"
-            dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4, stroke: "#fff" }}
-            activeDot={{ r: 6, strokeWidth: 0 }}
+            dot={{ fill: "#64748b", strokeWidth: 2, r: 4, stroke: "#fff" }}
+            activeDot={{ r: 6, strokeWidth: 0, fill: "#475569" }}
           />
           <Area
             yAxisId="sentiment"
             type="monotone"
             dataKey="sentiment"
-            stroke="#10b981"
+            stroke="url(#splitColorSentimentLine)"
             strokeWidth={4}
             fillOpacity={1}
-            fill="url(#colorSentiment)"
+            fill="url(#splitColorSentiment)"
             animationDuration={2500}
-            filter="url(#glow)"
             dot={(props) => {
               const { cx, cy, payload } = props;
               const color = payload.sentiment >= 0 ? "#10b981" : "#ef4444";
