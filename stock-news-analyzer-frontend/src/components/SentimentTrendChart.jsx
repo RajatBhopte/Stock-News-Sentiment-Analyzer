@@ -295,10 +295,11 @@ const SentimentTrendChart = ({ stockId, onDateSelect }) => {
               dataKey="date"
               tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 600 }}
               stroke="#6b7280"
-              angle={isMobile ? -45 : 0}
-              textAnchor={isMobile ? "end" : "middle"}
-              height={isMobile ? 60 : 30}
-              interval={isMobile ? "preserveStartEnd" : 0}
+              angle={timeRange === 30 || isMobile ? -45 : 0}
+              textAnchor={timeRange === 30 || isMobile ? "end" : "middle"}
+              height={timeRange === 30 || isMobile ? 55 : 30}
+              interval="preserveStartEnd"
+              minTickGap={15}
             />
             <YAxis
               tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 600 }}
