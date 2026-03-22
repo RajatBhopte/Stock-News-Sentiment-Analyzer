@@ -53,19 +53,19 @@ const LandingPage = () => {
 
       {/* Header */}
       <header className="fixed top-0 w-full z-50 border-b border-slate-200 bg-white/80 backdrop-blur-xl">
-        <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <nav className="max-w-7xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <TrendingUp className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <TrendingUp className="w-5 h-5 md:w-6 md:h-6 text-white" />
             </div>
-            <span className="text-xl font-black tracking-tighter text-slate-900">BULL<span className="text-blue-600">BEAR</span></span>
+            <span className="text-lg md:text-xl font-black tracking-tighter text-slate-900">BULL<span className="text-blue-600">BEAR</span></span>
           </div>
           <Link 
             to="/dashboard"
-            className="group px-6 py-2.5 bg-slate-900 text-white rounded-full font-bold text-sm flex items-center gap-2 hover:bg-blue-600 transition-all duration-300 shadow-lg shadow-slate-900/20"
+            className="group px-3 py-2 md:px-6 md:py-2.5 bg-slate-900 text-white rounded-full font-bold text-xs md:text-sm flex items-center gap-1 md:gap-2 hover:bg-blue-600 transition-all duration-300 shadow-lg shadow-slate-900/20"
           >
             Launch Terminal
-            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className="w-3.5 h-3.5 md:w-4 md:h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </nav>
       </header>
