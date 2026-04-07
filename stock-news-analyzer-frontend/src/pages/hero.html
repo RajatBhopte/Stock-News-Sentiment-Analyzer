@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SentimentEdge — AI-Powered Stock News Sentiment Analyser</title>
+  <meta name="description" content="Analyze real-time news sentiment across thousands of stocks. Stay ahead with AI-powered Sentiment Analysis, NLP, and Live News Feeds." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── RESET & ROOT ──────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #050d1a;
+      --bg2:       #071120;
+      --green:     #00ff87;
+      --teal:      #00c9b8;
+      --green-dim: rgba(0,255,135,.12);
+      --teal-dim:  rgba(0,201,184,.10);
+      --white:     #f0f8ff;
+      --muted:     #8ca0c0;
+      --border:    rgba(0,201,184,.18);
+      --glow:      0 0 40px rgba(0,255,135,.25);
+      --grad:      linear-gradient(135deg, var(--green), var(--teal));
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--white);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ─── CANVAS BACKGROUND ─────────────────────────────────────── */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── TOP ANNOUNCEMENT BANNER ───────────────────────────────── */
+    .top-banner {
+      position: relative;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 9px 20px;
+      background: linear-gradient(90deg, rgba(0,255,135,.08) 0%, rgba(0,201,184,.08) 100%);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: .02em;
+      backdrop-filter: blur(8px);
+    }
+
+    .pulse-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 1.8s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse {
+      0%,100% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px var(--green); }
+      50%      { transform: scale(1.5); opacity: .7; box-shadow: 0 0 18px var(--green); }
+    }
+
+    .banner-text { color: #c8dff8; }
+
+    .banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--green);
+      color: var(--green);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .banner-badge:hover { background: rgba(0,255,135,.12); }
+
+    /* ─── NAVBAR ────────────────────────────────────────────────── */
+    nav {
+      position: relative;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 60px;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 38px; height: 38px;
+      background: var(--grad);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 20px rgba(0,255,135,.35);
+    }
+
+    .logo-icon svg { width: 22px; height: 22px; }
+
+    .logo-text {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: .06em;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: .03em;
+      transition: color .2s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 1.5px;
+      background: var(--grad);
+      transition: width .3s ease;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cta {
+      padding: 9px 22px;
+      border-radius: 8px;
+      background: var(--grad);
+      color: #050d1a !important;
+      font-weight: 700 !important;
+      font-size: 13.5px !important;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s !important;
+      text-decoration: none !important;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(0,255,135,.4) !important;
+    }
+    .nav-cta::after { display: none !important; }
+
+    /* ─── HERO WRAPPER ──────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      z-index: 10;
+      min-height: calc(100vh - 100px);
+      display: flex;
+      align-items: center;
+      padding: 60px 60px 0;
+      overflow: hidden;
+    }
+
+    .hero-left {
+      flex: 1;
+      max-width: 700px;
+    }
+
+    /* ─── TAG BADGE ─────────────────────────────────────────────── */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: rgba(0,201,184,.07);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 28px;
+      backdrop-filter: blur(8px);
+      animation: fadeSlideUp .6s ease backwards;
+    }
+
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ─── HEADLINE ──────────────────────────────────────────────── */
+    .hero-headline {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 8vw, 108px);
+      line-height: .95;
+      letter-spacing: .02em;
+      color: var(--white);
+      margin-bottom: 28px;
+      animation: fadeSlideUp .7s .1s ease backwards;
+    }
+
+    .hero-headline .accent {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 30px rgba(0,255,135,.5));
+    }
+
+    /* ─── SUBHEADLINE ───────────────────────────────────────────── */
+    .hero-sub {
+      font-size: 16.5px;
+      line-height: 1.75;
+      color: #8bacc8;
+      max-width: 560px;
+      margin-bottom: 44px;
+      font-weight: 400;
+      animation: fadeSlideUp .7s .2s ease backwards;
+    }
+
+    /* ─── CTA BUTTON ────────────────────────────────────────────── */
+    .cta-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 56px;
+      animation: fadeSlideUp .7s .3s ease backwards;
+    }
+
+    .btn-primary {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 15px 32px;
+      border-radius: 10px;
+      background: var(--grad);
+      color: #050d1a;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      letter-spacing: .04em;
+      transition: transform .2s, box-shadow .2s;
+      overflow: hidden;
+      text-decoration: none;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,.15);
+      transform: translateX(-100%) skewX(-15deg);
+      transition: transform .4s ease;
+    }
+
+    .btn-primary:hover::before { transform: translateX(120%) skewX(-15deg); }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,255,135,.5); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 26px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .2s;
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--teal);
+      color: var(--white);
+      background: rgba(0,201,184,.08);
+    }
+
+    /* ─── SENTIMENT METER ───────────────────────────────────────── */
+    .sentiment-meter {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(5,20,45,.7);
+      backdrop-filter: blur(16px);
+      max-width: 380px;
+      margin-bottom: 8px;
+      animation: fadeSlideUp .7s .4s ease backwards;
+    }
+
+    .gauge-wrap {
+      position: relative;
+      width: 70px; height: 70px;
+      flex-shrink: 0;
+    }
+
+    .gauge-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+    .gauge-track { fill: none; stroke: rgba(255,255,255,.06); stroke-width: 6; }
+    .gauge-fill {
+      fill: none;
+      stroke: url(#gaugeGrad);
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 157;
+      stroke-dashoffset: 50;
+      filter: drop-shadow(0 0 6px rgba(0,255,135,.6));
+      animation: gaugeAnimate 2s 1s ease backwards;
+    }
+
+    @keyframes gaugeAnimate {
+      from { stroke-dashoffset: 157; }
+      to   { stroke-dashoffset: 50; }
+    }
+
+    .gauge-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(0deg);
+    }
+
+    .gauge-pct {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--green);
+      line-height: 1;
+      animation: countUp 2s 1s ease backwards;
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .gauge-tag { font-size: 8px; color: var(--muted); margin-top: 2px; }
+
+    .meter-info { flex: 1; }
+    .meter-title { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
+    .meter-label { font-size: 15px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
+
+    .meter-bar-track {
+      width: 100%; height: 5px;
+      border-radius: 100px;
+      background: rgba(255,255,255,.06);
+      overflow: hidden;
+    }
+
+    .meter-bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      background: var(--grad);
+      width: 0%;
+      box-shadow: 0 0 8px var(--green);
+      animation: barFill 2s 1s ease forwards;
+    }
+
+    @keyframes barFill {
+      from { width: 0%; }
+      to   { width: 68%; }
+    }
+
+    .meter-stocks { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .meter-stocks span { color: var(--teal); font-weight: 600; }
+
+    /* ─── FLOATING ICONS (RIGHT SIDE) ──────────────────────────── */
+    .hero-right {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 600px;
+      min-width: 400px;
+    }
+
+    .orbit-center {
+      position: absolute;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,255,135,.15) 0%, transparent 70%);
+      border: 1px solid rgba(0,255,135,.2);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+
+    .orbit-center::before {
+      content: '';
+      position: absolute;
+      inset: 15px;
+      border-radius: 50%;
+      border: 1px dashed rgba(0,201,184,.2);
+      animation: spinSlow 20s linear infinite;
+    }
+
+    .orbit-center::after {
+      content: 'SENTIMENT\nAI ENGINE';
+      white-space: pre;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-align: center;
+      color: var(--green);
+      line-height: 1.6;
+      padding: 10px;
+    }
+
+    @keyframes breathe {
+      0%,100% { box-shadow: 0 0 30px rgba(0,255,135,.15), inset 0 0 30px rgba(0,255,135,.05); }
+      50%      { box-shadow: 0 0 60px rgba(0,255,135,.35), inset 0 0 60px rgba(0,255,135,.1); }
+    }
+
+    @keyframes spinSlow { to { transform: rotate(360deg); } }
+
+    .orbit-ring {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px dashed rgba(255,255,255,.05);
+      pointer-events: none;
+    }
+
+    .ring-1 { width: 280px; height: 280px; animation: spinSlow 25s linear infinite; }
+    .ring-2 { width: 400px; height: 400px; animation: spinSlow 40s linear infinite reverse; }
+    .ring-3 { width: 520px; height: 520px; animation: spinSlow 55s linear infinite; }
+
+    .float-icon {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: default;
+      transition: transform .3s;
+    }
+
+    .float-icon:hover { transform: scale(1.15) !important; }
+
+    .icon-chip {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      border: 1px solid rgba(255,255,255,.1);
+      backdrop-filter: blur(10px);
+      transition: box-shadow .3s;
+    }
+
+    .icon-chip:hover { box-shadow: 0 0 20px rgba(0,255,135,.4); }
+
+    .icon-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: .06em;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Individual float animations */
+    @keyframes float1  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-14px) rotate(2deg)} }
+    @keyframes float2  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-18px) rotate(-3deg)} }
+    @keyframes float3  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-10px) rotate(2deg)} }
+    @keyframes float4  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-20px) rotate(-2deg)} }
+    @keyframes float5  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-12px) rotate(3deg)} }
+    @keyframes float6  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-16px) rotate(-1deg)} }
+    @keyframes float7  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-8px)  rotate(2deg)} }
+    @keyframes float8  { 0%,100%{transform:translateY(0px) rotate(0deg)}50%{transform:translateY(-22px) rotate(-3deg)} }
+
+    /* ─── SOCIAL PROOF STRIP ────────────────────────────────────── */
+    .proof-strip {
+      position: relative;
+      z-index: 10;
+      padding: 22px 60px;
+      border-top: 1px solid rgba(255,255,255,.05);
+      background: rgba(5,13,26,.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .proof-inner {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .proof-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      white-space: nowrap;
+      font-weight: 600;
+    }
+
+    .proof-divider {
+      width: 1px; height: 28px;
+      background: rgba(255,255,255,.1);
+      flex-shrink: 0;
+    }
+
+    .proof-logos {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .proof-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #4a6580;
+      transition: color .2s;
+      cursor: default;
+      white-space: nowrap;
+    }
+
+    .proof-logo:hover { color: #a0b8d0; }
+
+    .proof-logo .logo-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      opacity: .5;
+    }
+
+    /* ─── ANIMATIONS ────────────────────────────────────────────── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 40px 24px 0; flex-direction: column; gap: 40px; align-items: flex-start; }
+      .hero-right { min-width: unset; width: 100%; height: 340px; }
+      .proof-strip { padding: 20px 24px; }
+      .proof-inner { flex-wrap: wrap; gap: 16px; }
+    }
+
+    /* ─── LIVE TICKER ──────────────────────────────────────────── */
+    .ticker-wrap {
+      position: relative;
+      z-index: 10;
+      overflow: hidden;
+      background: rgba(0,255,135,.04);
+      border-bottom: 1px solid rgba(0,255,135,.1);
+      padding: 8px 0;
+    }
+
+    .ticker {
+      display: flex;
+      gap: 48px;
+      animation: ticker 30s linear infinite;
+      width: max-content;
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .ticker-item .sym { color: var(--white); font-weight: 600; }
+    .ticker-item .up  { color: var(--green); }
+    .ticker-item .dn  { color: #ff4d6a; }
+
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── SCROLL INDICATOR ─────────────────────────────────────── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 20;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      animation: fadeSlideUp 1s 1s ease backwards;
+    }
+
+    .mouse {
+      width: 22px; height: 36px;
+      border: 1.5px solid rgba(255,255,255,.2);
+      border-radius: 100px;
+      display: flex;
+      justify-content: center;
+      padding-top: 6px;
+    }
+
+    .mouse-dot {
+      width: 3px; height: 7px;
+      border-radius: 100px;
+      background: var(--teal);
+      animation: scrollDot 1.8s ease-in-out infinite;
+    }
+
+    @keyframes scrollDot {
+      0%,100% { transform: translateY(0); opacity: 1; }
+      50%      { transform: translateY(10px); opacity: .3; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── BACKGROUND CANVAS ── -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- ── TOP BANNER ── -->
+<div class="top-banner" role="banner">
+  <span class="pulse-dot" aria-hidden="true"></span>
+  <span class="banner-text">Now Live: Real-Time Market Sentiment</span>
+  <span class="banner-badge" role="button" tabindex="0">Try for Free →</span>
+</div>
+
+<!-- ── LIVE TICKER ── -->
+<div class="ticker-wrap" aria-label="Live stock ticker">
+  <div class="ticker" id="ticker">
+    <span class="ticker-item"><span class="sym">RELIANCE</span> ₹2,847.50 <span class="up">▲ +1.2%</span></span>
+    <span class="ticker-item"><span class="sym">TCS</span> ₹3,412.00 <span class="up">▲ +0.8%</span></span>
+    <span class="ticker-item"><span class="sym">INFY</span> ₹1,620.30 <span class="dn">▼ -0.4%</span></span>
+    <span class="ticker-item"><span class="sym">WIPRO</span> ₹458.75 <span class="up">▲ +2.1%</span></span>
+    <span class="ticker-item"><span class="sym">HDFC</span> ₹1,743.60 <span class="dn">▼ -0.9%</span></span>
+    <span class="ticker-item"><span class="sym">BAJFIN</span> ₹7,218.00 <span class="up">▲ +3.4%</span></span>
+    <span class="ticker-item"><span class="sym">AAPL</span> $189.25 <span class="up">▲ +0.6%</span></span>
+    <span class="ticker-item"><span class="sym">NVDA</span> $874.50 <span class="up">▲ +4.2%</span></span>
+    <span class="ticker-item"><span class="sym">TSLA</span> $215.80 <span class="dn">▼ -1.7%</span></span>
+    <span class="ticker-item"><span class="sym">MSFT</span> $420.10 <span class="up">▲ +0.3%</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span class="sym">RELIANCE</span> ₹2,847.50 <span class="up">▲ +1.2%</span></span>
+    <span class="ticker-item"><span class="sym">TCS</span> ₹3,412.00 <span class="up">▲ +0.8%</span></span>
+    <span class="ticker-item"><span class="sym">INFY</span> ₹1,620.30 <span class="dn">▼ -0.4%</span></span>
+    <span class="ticker-item"><span class="sym">WIPRO</span> ₹458.75 <span class="up">▲ +2.1%</span></span>
+    <span class="ticker-item"><span class="sym">HDFC</span> ₹1,743.60 <span class="dn">▼ -0.9%</span></span>
+    <span class="ticker-item"><span class="sym">BAJFIN</span> ₹7,218.00 <span class="up">▲ +3.4%</span></span>
+    <span class="ticker-item"><span class="sym">AAPL</span> $189.25 <span class="up">▲ +0.6%</span></span>
+    <span class="ticker-item"><span class="sym">NVDA</span> $874.50 <span class="up">▲ +4.2%</span></span>
+    <span class="ticker-item"><span class="sym">TSLA</span> $215.80 <span class="dn">▼ -1.7%</span></span>
+    <span class="ticker-item"><span class="sym">MSFT</span> $420.10 <span class="up">▲ +0.3%</span></span>
+  </div>
+</div>
+
+<!-- ── NAVBAR ── -->
+<nav role="navigation" aria-label="Main navigation">
+  <a href="#" class="logo" aria-label="SentimentEdge Home">
+    <div class="logo-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#050d1a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </div>
+    <span class="logo-text">SentimentEdge</span>
+  </a>
+
+  <ul class="nav-links" role="list">
+    <li><a href="#" id="nav-home">Home</a></li>
+    <li><a href="#" id="nav-features">Features</a></li>
+    <li><a href="#" id="nav-dashboard">Dashboard</a></li>
+    <li><a href="#" id="nav-about">About</a></li>
+    <li><a href="#" class="nav-cta" id="nav-get-started">Get Started →</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero" aria-label="Hero section">
+
+  <!-- Left Content -->
+  <div class="hero-left">
+
+    <div class="hero-badge" aria-label="Tag: AI-Powered. Market-Ready.">
+      <span class="dot" aria-hidden="true"></span>
+      AI-Powered. Market-Ready.
+    </div>
+
+    <h1 class="hero-headline">
+      Know What<br />
+      The Market<br />
+      <span class="accent">Feels</span> Before<br />
+      It Moves.
+    </h1>
+
+    <p class="hero-sub">
+      Analyze real-time news sentiment across thousands of stocks.
+      From bearish panic to bullish momentum — stay ahead of the herd
+      using Sentiment Analysis, NLP, and Live&nbsp;News&nbsp;Feeds.
+    </p>
+
+    <div class="cta-group">
+      <a href="#" class="btn-primary" id="cta-analyse" role="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analyse Now →
+      </a>
+      <a href="#" class="btn-secondary" id="cta-demo" role="button">
+        ▶ Watch Demo
+      </a>
+    </div>
+
+    <!-- Sentiment Meter -->
+    <div class="sentiment-meter" role="img" aria-label="Market Sentiment: 68% Bullish">
+      <div class="gauge-wrap">
+        <svg viewBox="0 0 60 60">
+          <defs>
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00ff87"/>
+              <stop offset="100%" stop-color="#00c9b8"/>
+            </linearGradient>
+          </defs>
+          <circle class="gauge-track" cx="30" cy="30" r="25"/>
+          <circle class="gauge-fill"  cx="30" cy="30" r="25"/>
+        </svg>
+        <div class="gauge-label">
+          <span class="gauge-pct" id="gauge-pct">68%</span>
+          <span class="gauge-tag">SCORE</span>
+        </div>
+      </div>
+      <div class="meter-info">
+        <div class="meter-title">Live Market Sentiment</div>
+        <div class="meter-label">🟢 Bullish Momentum</div>
+        <div class="meter-bar-track">
+          <div class="meter-bar-fill" id="meter-bar"></div>
+        </div>
+        <div class="meter-stocks">Tracking <span id="stock-count">2,847</span> stocks in real-time</div>
+      </div>
+    </div>
+
+  </div><!-- /hero-left -->
+
+  <!-- Right Floating Icons -->
+  <div class="hero-right" aria-hidden="true">
+
+    <!-- Orbit Rings -->
+    <div class="orbit-ring ring-1"></div>
+    <div class="orbit-ring ring-2"></div>
+    <div class="orbit-ring ring-3"></div>
+
+    <!-- Center -->
+    <div class="orbit-center"></div>
+
+    <!-- Floating Tech Icons -->
+    <div class="float-icon" style="top:10%;left:48%;animation:float1 4.2s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(55,118,171,.2);border-color:rgba(55,118,171,.4)">🐍</div>
+      <span class="icon-label">Python</span>
+    </div>
+
+    <div class="float-icon" style="top:22%;left:76%;animation:float2 3.8s .4s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(0,255,135,.1);border-color:rgba(0,255,135,.3)">🔤</div>
+      <span class="icon-label">NLTK</span>
+    </div>
+
+    <div class="float-icon" style="top:48%;left:88%;animation:float3 5s .8s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(0,201,184,.1);border-color:rgba(0,201,184,.3)">😊</div>
+      <span class="icon-label">VADER</span>
+    </div>
+
+    <div class="float-icon" style="top:72%;left:78%;animation:float4 4.5s 1.2s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(150,111,51,.2);border-color:rgba(200,160,80,.4)">🐼</div>
+      <span class="icon-label">Pandas</span>
+    </div>
+
+    <div class="float-icon" style="top:82%;left:48%;animation:float5 3.6s .2s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(99,46,143,.2);border-color:rgba(159,86,203,.4)">📊</div>
+      <span class="icon-label">Plotly</span>
+    </div>
+
+    <div class="float-icon" style="top:72%;left:18%;animation:float6 4.8s .6s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(255,69,0,.1);border-color:rgba(255,120,60,.3)">📰</div>
+      <span class="icon-label">NewsAPI</span>
+    </div>
+
+    <div class="float-icon" style="top:48%;left:8%;animation:float7 4s 1s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(0,100,180,.2);border-color:rgba(0,150,240,.3)">🧠</div>
+      <span class="icon-label">FinBERT</span>
+    </div>
+
+    <div class="float-icon" style="top:22%;left:18%;animation:float8 5.2s 0s ease-in-out infinite">
+      <div class="icon-chip" style="background:rgba(255,130,0,.1);border-color:rgba(255,160,50,.3)">⚡</div>
+      <span class="icon-label">TensorFlow</span>
+    </div>
+
+  </div><!-- /hero-right -->
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint" aria-hidden="true">
+    <div class="mouse"><div class="mouse-dot"></div></div>
+    <span>Scroll</span>
+  </div>
+
+</section><!-- /hero -->
+
+<!-- ── SOCIAL PROOF STRIP ── -->
+<div class="proof-strip" role="contentinfo" aria-label="Trusted by traders from leading platforms">
+  <div class="proof-inner">
+    <span class="proof-label">Trusted by traders from</span>
+    <div class="proof-divider" aria-hidden="true"></div>
+    <div class="proof-logos">
+      <span class="proof-logo"><span class="logo-dot"></span>Zerodha</span>
+      <span class="proof-logo"><span class="logo-dot"></span>Angel One</span>
+      <span class="proof-logo"><span class="logo-dot"></span>Groww</span>
+      <span class="proof-logo"><span class="logo-dot"></span>NSE</span>
+      <span class="proof-logo"><span class="logo-dot"></span>BSE</span>
+      <span class="proof-logo"><span class="logo-dot"></span>Robinhood</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────────────── JS ─── -->
+<script>
+/* ── BACKGROUND CANVAS: Candlestick Grid + Starfield ── */
+(function() {
+  const canvas = document.getElementById('bgCanvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, stars = [], candles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    buildStars();
+    buildCandles();
+  }
+
+  /* Stars */
+  function buildStars() {
+    stars = [];
+    const count = Math.floor(W * H / 4000);
+    for (let i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + .2,
+        a: Math.random(),
+        speed: Math.random() * .002 + .001,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  }
+
+  /* Candlestick grid data */
+  function buildCandles() {
+    candles = [];
+    const cols = Math.ceil(W / 28);
+    for (let i = 0; i < cols; i++) {
+      const open  = 0.25 + Math.random() * 0.5;
+      const close = 0.25 + Math.random() * 0.5;
+      const high  = Math.max(open, close) + Math.random() * 0.15;
+      const low   = Math.min(open, close) - Math.random() * 0.15;
+      candles.push({ x: i * 28 + 14, open, close, high, low });
+    }
+  }
+
+  function drawCandles(alpha) {
+    const baseY = H * 0.92;
+    const scale = H * 0.18;
+    candles.forEach(c => {
+      const bull = c.close >= c.open;
+      const col = bull ? `rgba(0,255,135,${alpha})` : `rgba(255,77,106,${alpha})`;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(c.x, baseY - c.high  * scale);
+      ctx.lineTo(c.x, baseY - c.low   * scale);
+      ctx.stroke();
+      const y1 = baseY - c.open  * scale;
+      const y2 = baseY - c.close * scale;
+      ctx.fillStyle = col;
+      ctx.fillRect(c.x - 5, Math.min(y1,y2), 10, Math.max(2, Math.abs(y1-y2)));
+    });
+  }
+
+  function drawGrid(alpha) {
+    ctx.strokeStyle = `rgba(0,201,184,${alpha})`;
+    ctx.lineWidth = .5;
+    const step = 60;
+    for (let x = 0; x < W; x += step) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += step) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+  }
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    /* grid */
+    drawGrid(.03);
+
+    /* stars */
+    const now = Date.now() / 1000;
+    stars.forEach(s => {
+      const alpha = 0.3 + 0.4 * Math.sin(now * s.speed * 40 + s.phase);
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,230,255,${alpha})`;
+      ctx.fill();
+    });
+
+    /* candles */
+    drawCandles(.07);
+
+    t++;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  draw();
+})();
+
+/* ── GAUGE COUNTER ANIMATION ── */
+(function() {
+  const el = document.getElementById('gauge-pct');
+  let start = null;
+  const target = 68;
+  const duration = 2000;
+  const delay = 1000;
+
+  setTimeout(() => {
+    function step(ts) {
+      if (!start) start = ts;
+      const pct = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - pct, 3);
+      el.textContent = Math.round(ease * target) + '%';
+      if (pct < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }, delay);
+})();
+
+/* ── STOCK COUNT TICKER ── */
+(function() {
+  const el = document.getElementById('stock-count');
+  setInterval(() => {
+    const delta = Math.floor(Math.random() * 6) - 2;
+    const current = parseInt(el.textContent.replace(',', ''));
+    const next = Math.max(2800, Math.min(2999, current + delta));
+    el.textContent = next.toLocaleString();
+  }, 1800);
+})();
+
+/* ── NAVBAR SCROLL EFFECT ── */
+(function() {
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) {
+      nav.style.background = 'rgba(5,13,26,.95)';
+      nav.style.boxShadow  = '0 4px 30px rgba(0,0,0,.4)';
+    } else {
+      nav.style.background = '';
+      nav.style.boxShadow  = '';
+    }
+  }, { passive: true });
+})();
+
+/* ── FLOATING ICON MOUSE PARALLAX ── */
+(function() {
+  const floats = document.querySelectorAll('.float-icon');
+  document.addEventListener('mousemove', e => {
+    const cx = window.innerWidth  / 2;
+    const cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx;
+    const dy = (e.clientY - cy) / cy;
+    floats.forEach((el, i) => {
+      const depth = (i % 3 + 1) * 5;
+      el.style.transform = `translate(${dx * depth}px, ${dy * depth}px)`;
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
