@@ -416,6 +416,7 @@ import {
 const PriceSentimentChart = ({ stockId }) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState(7);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -434,10 +435,22 @@ const PriceSentimentChart = ({ stockId }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch(
           `${BASE_URL}/api/stock/price-sentiment/${stockId}?days=${timeRange}`,
         );
+
+        // On an upstream failure this endpoint returns {error, details}, not an
+        // array — calling .map() on that is what blanked the chart.
+        if (!response.ok) {
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.error || `Request failed (${response.status})`);
+        }
+
         const result = await response.json();
+        if (!Array.isArray(result)) {
+          throw new Error("Unexpected response format");
+        }
 
         const formatted = result.map((item, index) => {
           let priceChange = 0;
@@ -472,6 +485,8 @@ const PriceSentimentChart = ({ stockId }) => {
         setData(formatted);
       } catch (err) {
         console.error("Failed to fetch data:", err);
+        setError(err.message);
+        setData([]);
       } finally {
         setLoading(false);
       }
@@ -495,10 +510,12 @@ const PriceSentimentChart = ({ stockId }) => {
       <div className="h-[300px] sm:h-[450px] flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
         <div className="text-center">
           <p className="text-gray-600 text-base sm:text-lg font-semibold">
-            No data available
+            {error ? "Price data unavailable" : "No data available"}
           </p>
-          <p className="text-gray-500 text-xs sm:text-sm mt-2">
-            Check back later
+          <p className="text-gray-500 text-xs sm:text-sm mt-2 px-4">
+            {error
+              ? "The market data provider is rate-limiting requests. Try again shortly."
+              : "Check back later"}
           </p>
         </div>
       </div>

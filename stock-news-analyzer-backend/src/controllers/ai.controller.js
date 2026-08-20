@@ -3,7 +3,7 @@ import Stock from "../models/Stock.model.js";
 import Sentiment from "../models/sentiment.model.js";
 import { generateStockSummary, generatePricePrediction } from "../services/ai.service.js";
 import NodeCache from "node-cache";
-import axios from "axios";
+import { fetchDailySeries } from "../services/yahooPrice.service.js";
 
 // Cache AI summaries for 15 minutes (900 seconds)
 const summaryCache = new NodeCache({ stdTTL: 900 });
@@ -92,17 +92,7 @@ export const getStockPricePrediction = async (req, res) => {
       date: { $gte: startDateString },
     }).sort({ date: 1 }).lean();
 
-    const endDate = Math.floor(Date.now() / 1000);
-    const startDate = endDate - days * 24 * 60 * 60;
-
-    const priceResponse = await axios.get(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${stock.symbol}.NS`,
-      { params: { period1: startDate, period2: endDate, interval: "1d" } }
-    );
-
-    const result = priceResponse.data.chart.result[0];
-    const timestamps = result.timestamp;
-    const quotes = result.indicators.quote[0];
+    const { timestamps, quotes } = await fetchDailySeries(stock.symbol, days);
 
     // Merge data for AI
     const historicalData = timestamps.map((ts, i) => {
@@ -123,6 +113,15 @@ export const getStockPricePrediction = async (req, res) => {
     res.status(200).json(prediction);
   } catch (error) {
     console.error("Prediction Controller Error:", error);
+
+    // The price provider throttling us is not the AI being busy — reporting it
+    // as a Gemini rate limit sent us chasing the wrong quota for hours.
+    if (error.name === "PriceProviderError") {
+      return res.status(503).json({
+        message: "Market data provider is unavailable. Please try again shortly.",
+        error: error.message,
+      });
+    }
 
     // Check if it's a rate limit error from Gemini
     const errorMessage = error.message || "";

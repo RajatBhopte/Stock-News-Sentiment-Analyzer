@@ -6,8 +6,9 @@ dotenv.config();
 const genAI = new GoogleGenerativeAI(process.env.Gemini_API?.trim());
 
 // Primary and fallback models for resilience
-const PRIMARY_MODEL = "gemini-3.6-flash";
-const FALLBACK_MODEL = "gemini-2.0-flash-lite";
+// Free-tier request quotas are per-model, so a spent quota on one still leaves
+// the next usable. Ordered strongest-first.
+const MODEL_CHAIN = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
 
 /**
  * Attempts to generate content with the primary model, falls back on 503/overload errors.
@@ -15,22 +16,25 @@ const FALLBACK_MODEL = "gemini-2.0-flash-lite";
  * @returns {Promise<import("@google/generative-ai").GenerateContentResult>}
  */
 const generateWithFallback = async (prompt) => {
-  const models = [PRIMARY_MODEL, FALLBACK_MODEL];
   let lastError;
 
-  for (const modelName of models) {
+  for (const modelName of MODEL_CHAIN) {
     try {
       const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
-      return result;
+      return await model.generateContent(prompt);
     } catch (error) {
       lastError = error;
       const status = error?.status || error?.httpStatusCode;
       const msg = error?.message || "";
-      const isOverloaded = status === 503 || msg.includes("503") || msg.includes("high demand") || msg.includes("overloaded");
+      // 429 (quota) and 503 (overloaded) are both worth retrying on the next
+      // model in the chain; anything else is a real error, so stop.
+      const shouldTryNext =
+        status === 429 ||
+        status === 503 ||
+        /429|503|quota|high demand|overloaded|too many requests/i.test(msg);
 
-      if (isOverloaded && modelName !== FALLBACK_MODEL) {
-        console.warn(`Model "${modelName}" is overloaded (503), trying fallback "${FALLBACK_MODEL}"...`);
+      if (shouldTryNext && modelName !== MODEL_CHAIN[MODEL_CHAIN.length - 1]) {
+        console.warn(`Model "${modelName}" unavailable (${status ?? "error"}), trying next...`);
         continue;
       }
       throw error;

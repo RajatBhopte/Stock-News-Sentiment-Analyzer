@@ -1,6 +1,6 @@
-import axios from "axios";
 import Sentiment from "../models/sentiment.model.js";
-import Stock from "../models/Stock.model.js";   
+import Stock from "../models/Stock.model.js";
+import { fetchDailySeries } from "../services/yahooPrice.service.js";   
 const getPriceSentimentData = async (req, res) => {
   try {
     const { stockId } = req.params;
@@ -32,14 +32,7 @@ const getPriceSentimentData = async (req, res) => {
     const endDate = Math.floor(Date.now() / 1000);
     const startDate = endDate - days * 24 * 60 * 60;
 
-    const priceResponse = await axios.get(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${stock.symbol}.NS`,
-      { params: { period1: startDate, period2: endDate, interval: "1d" } },
-    );
-
-    const result = priceResponse.data.chart.result[0];
-    const timestamps = result.timestamp;
-    const quotes = result.indicators.quote[0];
+    const { timestamps, quotes } = await fetchDailySeries(stock.symbol, days);
 
     const priceMap = {};
     timestamps.forEach((timestamp, i) => {
@@ -67,7 +60,7 @@ const getPriceSentimentData = async (req, res) => {
     ].sort();
 
     const mergedData = allDates
-      .filter((date) => priceMap[date])
+      .filter((date) => priceMap[date] && priceMap[date].close !== null)
       .map((date) => ({
         date,
         ...priceMap[date],
@@ -78,10 +71,21 @@ const getPriceSentimentData = async (req, res) => {
 
     res.json(mergedData);
   } catch (error) {
-    console.error("Error:", error);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch data", details: error.message });
+    // An upstream throttle or outage is not our bug — report it as such so the
+    // client can distinguish "try later" from a real server fault.
+    const upstream = error.status ?? error.response?.status;
+    const isUpstream =
+      error.throttled || upstream === 429 || (upstream >= 500 && upstream < 600);
+    console.error(
+      `[PriceSentiment] ${isUpstream ? `upstream ${upstream}` : "error"}:`,
+      error.message,
+    );
+    res.status(isUpstream ? 503 : 500).json({
+      error: isUpstream
+        ? "Price provider is rate-limiting requests"
+        : "Failed to fetch data",
+      details: error.message,
+    });
   }
 };
 
