@@ -5,8 +5,9 @@ const runSentimentJob = async () => {
   console.log("--- Starting Sentiment Analysis Job ---");
 
   // Find news that haven't been analyzed yet
-  const pendingNews = await News.find({ processed: false }).limit(20);
-  console.log(`[AI] Processing ${pendingNews.length} articles...`);
+  const totalPending = await News.countDocuments({ processed: false });
+  const pendingNews = await News.find({ processed: false }).limit(100);
+  console.log(`[AI] Processing ${pendingNews.length} of ${totalPending} pending articles...`);
 
   for (const article of pendingNews) {
     const result = await analyzeSentiment(article.title);
@@ -22,10 +23,11 @@ const runSentimentJob = async () => {
     }
 
     // Small delay to respect Hugging Face free tier rate limits
-    await new Promise((res) => setTimeout(res, 1000));
+    await new Promise((res) => setTimeout(res, 500));
   }
 
   console.log("--- Sentiment Analysis Job Completed ---");
 };
 
 export default runSentimentJob;
+

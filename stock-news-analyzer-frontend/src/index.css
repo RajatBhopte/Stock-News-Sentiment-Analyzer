@@ -1,4 +1,13 @@
 @import "tailwindcss";
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #94a3b8 #f1f5f9;
@@ -22,6 +31,12 @@
   background: #64748b;
 }
 
+@media (max-width: 640px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -36,5 +51,25 @@
 .animate-fadeIn {
   animation: fadeIn 0.4s ease-out;
 }
-@variant dark (&:where(.dark, .dark *));
 
+/* Live indices ticker marquee */
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
+}
+
+.animate-scroll {
+  animation: ticker-scroll 20s linear infinite;
+}
+
+@media (hover: hover) {
+  .animate-scroll:hover {
+    animation-play-state: paused;
+  }
+}
+
+@variant dark (&:where(.dark, .dark *));

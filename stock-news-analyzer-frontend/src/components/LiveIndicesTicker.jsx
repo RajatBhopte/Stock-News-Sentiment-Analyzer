@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
-const BASE_URL = import.meta.env.VITE_API_URL
+const BASE_URL = import.meta.env.VITE_API_URL;
 const SlimIndicesTicker = () => {
   const [indices, setIndices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,27 +29,27 @@ const SlimIndicesTicker = () => {
     const isPositive = data.changePercent >= 0;
 
     return (
-      <div className="flex items-center gap-3 px-6 whitespace-nowrap">
-        <span className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+      <div className="flex items-center gap-1.5 sm:gap-3 px-3 sm:px-6 whitespace-nowrap">
+        <span className="text-[10px] sm:text-sm font-bold text-gray-800 uppercase tracking-wide">
           {data.name}
         </span>
-        <span className="text-lg font-bold text-gray-900">
+        <span className="text-xs sm:text-lg font-bold text-gray-900">
           {data.value.toLocaleString("en-IN", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
           })}
         </span>
         <div
-          className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-bold ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-sm font-bold ${
             isPositive
               ? "bg-green-100 text-green-700"
               : "bg-red-100 text-red-700"
           }`}
         >
           {isPositive ? (
-            <TrendingUp className="w-4 h-4" />
+            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />
           ) : (
-            <TrendingDown className="w-4 h-4" />
+            <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4" />
           )}
           <span>
             {isPositive ? "+" : ""}
@@ -66,13 +65,21 @@ const SlimIndicesTicker = () => {
   };
 
   if (loading)
-    return <div className="py-3 text-center">Loading market data...</div>;
+    return (
+      <div className="py-2 sm:py-3 text-center text-xs sm:text-sm text-gray-600">
+        Loading market data...
+      </div>
+    );
   if (error)
-    return <div className="py-3 text-center text-red-600">Error: {error}</div>;
+    return (
+      <div className="py-2 sm:py-3 px-3 text-center text-xs sm:text-sm text-red-600">
+        Error: {error}
+      </div>
+    );
 
   return (
     <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b-2 border-gray-200 shadow-md overflow-hidden">
-      <div className="relative py-3">
+      <div className="relative py-2 sm:py-3">
         <div className="flex animate-scroll">
           {indices.map((index, idx) => (
             <IndexItem key={`first-${idx}`} data={index} />
@@ -85,23 +92,6 @@ const SlimIndicesTicker = () => {
           ))}
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-33.333%);
-          }
-        }
-        .animate-scroll {
-          animation: scroll 20s linear infinite;
-        }
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
     </div>
   );
 };

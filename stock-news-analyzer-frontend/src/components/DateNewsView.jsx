@@ -54,7 +54,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
 
   return (
     <div
-      className="bg-white rounded-2xl border-2 border-blue-400 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+      className="bg-white rounded-xl sm:rounded-2xl border-2 border-blue-400 shadow-2xl overflow-hidden max-h-[88vh] sm:max-h-[90vh] flex flex-col"
       onMouseDown={(e) => e.stopPropagation()}
       onMouseMove={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
@@ -65,9 +65,9 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
       }}
     >
       {/* Header - Fixed */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4 flex items-center justify-between flex-shrink-0">
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-          <span className="text-2xl">📰</span>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-3 sm:p-4 flex items-center justify-between gap-2 flex-shrink-0">
+        <h3 className="text-sm sm:text-xl font-bold text-white flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <span className="text-lg sm:text-2xl flex-shrink-0">📰</span>
           News from{" "}
           {new Date(selectedDate).toLocaleDateString("en-IN", {
             month: "long",
@@ -80,32 +80,33 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
             e.stopPropagation();
             onClose();
           }}
-          className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg font-semibold text-white transition-colors flex-shrink-0"
+          className="px-3 sm:px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm sm:text-base font-semibold text-white transition-colors flex-shrink-0"
         >
-          ✕ Close
+          <span className="sm:hidden">✕</span>
+          <span className="hidden sm:inline">✕ Close</span>
         </button>
       </div>
 
       {/* Content - Scrollable */}
       <div
-        className="p-6 bg-gray-50 overflow-y-auto flex-1"
+        className="p-3 sm:p-6 bg-gray-50 overflow-y-auto flex-1 overscroll-contain"
         onMouseDown={(e) => e.stopPropagation()}
         style={{
-          maxHeight: "calc(90vh - 80px)",
+          maxHeight: "calc(88vh - 72px)",
           overflowY: "auto",
         }}
       >
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-4"></div>
+          <div className="flex flex-col items-center justify-center py-12 sm:py-16">
+            <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600 mb-4"></div>
             <p className="text-gray-600 font-medium">
               Loading news articles...
             </p>
           </div>
         ) : error ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">⚠️</div>
-            <p className="text-xl font-bold text-red-700 mb-2">
+          <div className="text-center py-10 sm:py-16 px-2">
+            <div className="text-4xl sm:text-6xl mb-4">⚠️</div>
+            <p className="text-base sm:text-xl font-bold text-red-700 mb-2">
               Error loading news
             </p>
             <p className="text-gray-500">{error}</p>
@@ -118,7 +119,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
           </div>
         ) : news.length > 0 ? (
           <div className="space-y-4">
-            <p className="text-sm text-gray-600 font-medium mb-4 sticky top-0 bg-gray-50 py-2 z-10">
+            <p className="text-xs sm:text-sm text-gray-600 font-medium mb-3 sm:mb-4 sticky top-0 bg-gray-50 py-2 z-10">
               Found {news.length} article{news.length !== 1 ? "s" : ""} from
               this day
             </p>
@@ -134,7 +135,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
               return (
                 <div
                   key={article._id}
-                  className="border-2 border-gray-300 rounded-xl p-5 bg-white hover:shadow-lg hover:border-blue-400 transition-all"
+                  className="border-2 border-gray-300 rounded-lg sm:rounded-xl p-3 sm:p-5 bg-white hover:shadow-lg hover:border-blue-400 transition-all"
                   onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => e.stopPropagation()}
                   style={{
@@ -142,13 +143,13 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
                     userSelect: "text",
                   }}
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-4">
                     <div className="flex-1 min-w-0">
                       <a
                         href={article.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-base font-bold text-gray-900 hover:text-blue-600 hover:underline block mb-2 break-words"
+                        className="text-sm sm:text-base font-bold text-gray-900 hover:text-blue-600 hover:underline block mb-2 break-words"
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log("Opening:", article.url);
@@ -156,7 +157,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
                       >
                         {article.title}
                       </a>
-                      <div className="flex items-center gap-3 text-xs text-gray-500 font-medium flex-wrap">
+                      <div className="flex items-center gap-2 sm:gap-3 text-[11px] sm:text-xs text-gray-500 font-medium flex-wrap">
                         <span className="font-semibold">
                           {article.source || "Unknown"}
                         </span>
@@ -184,7 +185,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
                         </a>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end gap-2 flex-shrink-0 w-full sm:w-auto">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold uppercase whitespace-nowrap ${
                           article.sentimentLabel === "positive"
@@ -197,7 +198,7 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
                         {article.sentimentLabel || "unknown"}
                       </span>
                       <span
-                        className={`text-lg font-mono font-bold ${
+                        className={`text-base sm:text-lg font-mono font-bold ${
                           (article.sentimentScore || 0) >= 0
                             ? "text-green-600"
                             : "text-red-600"
@@ -214,12 +215,12 @@ const DateNewsView = ({ stockId, selectedDate, onClose }) => {
             })}
           </div>
         ) : (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">📭</div>
-            <p className="text-xl font-bold text-gray-700 mb-2">
+          <div className="text-center py-10 sm:py-16 px-2">
+            <div className="text-4xl sm:text-6xl mb-4">📭</div>
+            <p className="text-base sm:text-xl font-bold text-gray-700 mb-2">
               No news articles found
             </p>
-            <p className="text-gray-500">
+            <p className="text-xs sm:text-base text-gray-500">
               The market might have been closed or no relevant news was
               published on this date
             </p>

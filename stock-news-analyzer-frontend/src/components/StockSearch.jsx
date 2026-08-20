@@ -52,20 +52,20 @@ const StockSearch = ({ onStockSelect, currentStock }) => {
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="Search stocks (e.g., TCS, Infosys, Reliance)..."
+            placeholder="Search stocks (e.g., TCS, Infosys)..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setShowDropdown(true);
             }}
             onFocus={() => setShowDropdown(true)}
-            className="w-full px-4 py-3 pr-12 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-gray-900 font-medium placeholder-gray-500"
+            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-10 sm:pr-12 bg-white border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:outline-none text-base text-gray-900 font-medium placeholder-gray-500"
           />
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-2xl">
+          <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-lg sm:text-2xl pointer-events-none">
             🔍
           </span>
         </div>
@@ -99,7 +99,7 @@ const StockSearch = ({ onStockSelect, currentStock }) => {
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-bold text-gray-900">{stock.name}</p>
+                      <p className="font-bold text-sm sm:text-base text-gray-900">{stock.name}</p>
                       <p className="text-sm text-gray-600 mt-0.5">
                         {stock.symbol}
                       </p>
@@ -123,15 +123,16 @@ const StockSearch = ({ onStockSelect, currentStock }) => {
       )}
 
       {/* Quick Select Buttons */}
-      <div className="mt-3 flex flex-wrap gap-2">
-        <p className="text-sm text-gray-600 font-medium w-full mb-1">
+      <div className="mt-3">
+        <p className="text-xs sm:text-sm text-gray-600 font-medium mb-2">
           Quick Select:
         </p>
+        <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible -mx-1 px-1">
         {availableStocks.slice(0, 5).map((stock) => (
           <button
             key={stock.id}
             onClick={() => handleSelectStock(stock)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+            className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
               currentStock?.id === stock.id
                 ? "bg-blue-600 text-white shadow-md"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
@@ -139,7 +140,8 @@ const StockSearch = ({ onStockSelect, currentStock }) => {
           >
             {stock.symbol}
           </button>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

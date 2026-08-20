@@ -17,7 +17,8 @@ const AISummary = ({ stockId }) => {
     } catch (err) {
       if (axios.isCancel(err)) return;
       console.error("Summary Error:", err);
-      const message = err.response?.data?.message || (err.response?.status === 429 ? "AI is resting. Retry in a minute." : "Network or Fetch error.");
+      const status = err.response?.status;
+      const message = err.response?.data?.message || (status === 429 ? "AI is resting. Retry in a minute." : status === 503 ? "AI model is busy due to high demand. Try again shortly." : "Network or Fetch error.");
       setError(message);
     } finally {
       setLoading(false);
@@ -30,6 +31,9 @@ const AISummary = ({ stockId }) => {
     return () => controller.abort();
   }, [stockId]);
 
+  // Strip emojis and special unicode characters
+  const stripEmojis = (str) => str.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu, '').trim();
+
   const parseSummary = (text) => {
     if (!text) return { grade: null, bullets: [] };
     
@@ -38,25 +42,27 @@ const AISummary = ({ stockId }) => {
     const grade = gradeMatch ? gradeMatch[1].replace(/[\[\]]/g, '').trim() : null;
     
     // Remove the GRADE line for bullet parsing
-    const cleanText = text.replace(/GRADE:.*$/im, "").trim();
+    const cleanText = text.replace(/GRADE:.*$/im, "").replace(/\*\*/g, "").trim();
 
     // Split by common bullet points or newlines
-    const bulletLines = cleanText.split(/\n[•*-]\s?|\n(?=[•*-])|[•*-]\s?/).filter(l => l.trim());
+    const bulletLines = cleanText.split(/\n[•*\-]\s?|\n(?=[•*\-])|[•]\s?/).filter(l => l.trim().length > 5);
     
     const bullets = bulletLines.map(line => {
-      // Look for **THEME**
-      const parts = line.split(/\*\*(.*?)\*\*/);
-      if (parts.length >= 3) {
+      // Clean up the line: strip emojis, asterisks, leading dashes/bullets
+      let cleaned = stripEmojis(line).replace(/\*\*/g, '').replace(/^[\s•*\-]+/, '').trim();
+      
+      // Try to split on first colon to get THEME: content
+      const colonIdx = cleaned.indexOf(':');
+      if (colonIdx > 0 && colonIdx < 40) {
         return {
-          emoji: parts[0].replace(/[•*-]/g, '').trim() || "💡",
-          theme: parts[1].trim(),
-          content: parts.slice(2).join('').replace(/^:\s?/, '').trim()
+          theme: cleaned.substring(0, colonIdx).trim(),
+          content: cleaned.substring(colonIdx + 1).trim()
         };
       }
       return null;
     }).filter(Boolean);
 
-    return { grade, bullets, raw: cleanText };
+    return { grade, bullets, raw: stripEmojis(cleanText).replace(/\*\*/g, '') };
   };
 
   const { grade, bullets, raw } = parseSummary(data.summary);
@@ -70,14 +76,14 @@ const AISummary = ({ stockId }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden relative group min-h-[200px]">
+    <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-100 dark:border-gray-700 shadow-xl overflow-hidden relative group min-h-[200px]">
       {/* Background Decorative Element */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -mr-16 -mt-16 blur-3xl" />
       
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/30 dark:bg-gray-900/30">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-500/10 rounded-lg">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2 bg-gray-50/30 dark:bg-gray-900/30">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="p-2 bg-blue-500/10 rounded-lg flex-shrink-0">
             <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
@@ -86,18 +92,18 @@ const AISummary = ({ stockId }) => {
           </div>
         </div>
         {grade && (
-          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg ${getGradeStyles(grade)}`}>
+          <div className={`px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest shadow-lg flex-shrink-0 whitespace-nowrap ${getGradeStyles(grade)}`}>
             {grade}
           </div>
         )}
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <AnimatePresence mode="wait">
           {loading ? (
             <div className="space-y-4">
               {[1, 2, 3].map(i => (
-                <div key={i} className="flex gap-4 animate-pulse">
+                <div key={i} className="flex gap-3 sm:gap-4 animate-pulse">
                   <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 bg-gray-100 dark:bg-gray-700 rounded w-1/4" />
@@ -127,9 +133,9 @@ const AISummary = ({ stockId }) => {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  className="flex gap-4 items-start"
+                  className="flex gap-3 sm:gap-4 items-start"
                 >
-                  <span className="text-xl filter drop-shadow-sm">{b.emoji}</span>
+                  <span className="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center text-xs font-black text-blue-600 dark:text-blue-400 shrink-0">{idx + 1}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2 mb-1">
                       <span className="text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-tight">
@@ -158,14 +164,14 @@ const AISummary = ({ stockId }) => {
       </div>
 
       {/* Footer Info */}
-      <div className="px-6 py-3 bg-gray-50/50 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+      <div className="px-4 sm:px-6 py-3 bg-gray-50/50 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-gray-400 uppercase">Engine v2.1 Active</span>
+          <span className="text-[10px] font-bold text-gray-400 uppercase whitespace-nowrap">Engine v2.1 Active</span>
         </div>
         <button 
           onClick={() => fetchSummary()} 
-          className="text-[10px] font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 transition-colors uppercase tracking-widest"
+          className="text-[10px] font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 transition-colors uppercase tracking-widest whitespace-nowrap"
         >
           Force Refresh
         </button>

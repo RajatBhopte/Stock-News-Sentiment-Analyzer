@@ -22,12 +22,14 @@ const StockDetail = ({ stockId, stockName, stockSymbol }) => {
   return (
     <>
       {/* Main Dashboard Content */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="space-y-4">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 shadow-xl text-white">
-            <h1 className="text-3xl md:text-4xl font-bold">{stockName}</h1>
-            <p className="text-blue-100 mt-2 font-medium">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold break-words">
+              {stockName}
+            </h1>
+            <p className="text-blue-100 mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-base font-medium">
               AI-Powered Real-Time Sentiment Analysis Dashboard
             </p>
           </div>
@@ -36,7 +38,7 @@ const StockDetail = ({ stockId, stockName, stockSymbol }) => {
         </div>
 
         {/* AI Insight Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <AISummary stockId={stockId} />
           <AIPrediction stockId={stockId} />
         </div>
@@ -45,11 +47,11 @@ const StockDetail = ({ stockId, stockName, stockSymbol }) => {
         <SentimentOverview stockId={stockId} />
 
         {/* Main Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* LEFT COLUMN */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Sentiment Trend Chart */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-3 sm:p-6">
               <SentimentTrendChart
                 stockId={stockId}
                 onDateSelect={handleDateSelect}
@@ -59,12 +61,12 @@ const StockDetail = ({ stockId, stockName, stockSymbol }) => {
 
           {/* RIGHT COLUMN - News Feed */}
           <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-8 lg:sticky lg:top-6 max-h-[calc(100vh-100px)] overflow-hidden flex flex-col">
-              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-7 flex items-center gap-2 flex-shrink-0">
-                <span className="text-3xl">📰</span>
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-4 sm:p-6 lg:sticky lg:top-6 max-h-[70vh] lg:max-h-[calc(100vh-100px)] overflow-hidden flex flex-col">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-5 flex items-center gap-2 flex-shrink-0">
+                <span className="text-xl sm:text-2xl lg:text-3xl">📰</span>
                 Latest News
               </h2>
-              <div className="overflow-y-auto flex-1 -mr-2 pr-2 custom-scrollbar">
+              <div className="overflow-y-auto flex-1 -mr-1 pr-1 sm:-mr-2 sm:pr-2 custom-scrollbar overscroll-contain">
                 <NewsFeed stockId={stockId} />
               </div>
             </div>
@@ -78,11 +80,11 @@ const StockDetail = ({ stockId, stockName, stockSymbol }) => {
       {/* Date News Modal */}
       {selectedDate && (
         <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 bg-black/50 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4 overflow-y-auto"
           onClick={handleCloseNewsView}
         >
           <div
-            className="w-full max-w-4xl my-8"
+            className="w-full max-w-4xl my-4 sm:my-8"
             onClick={(e) => e.stopPropagation()}
           >
             <DateNewsView

@@ -614,7 +614,7 @@ const PriceSentimentChart = ({ stockId }) => {
     <div className="space-y-4 sm:space-y-5">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+          <h3 className="text-lg sm:text-2xl font-bold text-gray-900">
             Price vs Sentiment
           </h3>
           <p className="text-xs sm:text-sm text-gray-600 mt-1 font-medium">
@@ -628,7 +628,7 @@ const PriceSentimentChart = ({ stockId }) => {
             <button
               key={days}
               onClick={() => setTimeRange(days)}
-              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 ${
+              className={`flex-1 sm:flex-none px-4 sm:px-5 py-2.5 rounded-lg sm:rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 ${
                 timeRange === days
                   ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg scale-105"
                   : "bg-white text-gray-700 border-2 border-gray-300 hover:border-blue-500 hover:text-blue-600 hover:shadow-md"

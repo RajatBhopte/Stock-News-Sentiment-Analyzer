@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import StockDetail from "./components/StockDetail";
 import StockSearch from "./components/StockSearch";
 import LiveIndicesTicker from "./components/LiveIndicesTicker";
 import SectorHeatmap from "./pages/SectorHeatmap";
 import LandingPage from "./pages/LandingPage";
-import { LayoutGrid } from "lucide-react";
 
 function Dashboard() {
   const [selectedStock, setSelectedStock] = useState({
@@ -21,20 +20,23 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen overflow-x-hidden bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <LiveIndicesTicker />
-     
-      <div className="max-w-[1600px] mx-auto p-4 md:p-6 space-y-12">
+
+      <div className="max-w-[1600px] mx-auto px-3 py-4 sm:p-4 md:p-6 space-y-6 sm:space-y-8 md:space-y-12">
         {/* Navigation & Search Bar */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-4 max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-4">
-          <div className="flex-1 w-full">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+        <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-700 shadow-lg p-3 sm:p-4 max-w-5xl mx-auto">
+          <div className="w-full">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3">
               BullBear
             </h2>
-            <StockSearch onStockSelect={handleStockSelect} />
+            <StockSearch
+              onStockSelect={handleStockSelect}
+              currentStock={selectedStock}
+            />
           </div>
         </div>
-        
+
         {/* Dashboard */}
         <StockDetail
           stockId={selectedStock.id}
@@ -43,7 +45,7 @@ function Dashboard() {
         />
 
         {/* Market Heatmap at the bottom */}
-        <div className="pt-12 border-t-2 border-gray-200/50 dark:border-gray-700/50">
+        <div className="pt-6 sm:pt-8 md:pt-12 border-t-2 border-gray-200/50 dark:border-gray-700/50">
           <SectorHeatmap standalone={false} onStockSelect={handleStockSelect} />
         </div>
       </div>

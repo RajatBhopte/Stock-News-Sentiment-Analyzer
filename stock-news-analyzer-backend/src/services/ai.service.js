@@ -5,6 +5,40 @@ dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.Gemini_API?.trim());
 
+// Primary and fallback models for resilience
+const PRIMARY_MODEL = "gemini-3.6-flash";
+const FALLBACK_MODEL = "gemini-2.0-flash-lite";
+
+/**
+ * Attempts to generate content with the primary model, falls back on 503/overload errors.
+ * @param {string} prompt - The prompt to send
+ * @returns {Promise<import("@google/generative-ai").GenerateContentResult>}
+ */
+const generateWithFallback = async (prompt) => {
+  const models = [PRIMARY_MODEL, FALLBACK_MODEL];
+  let lastError;
+
+  for (const modelName of models) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      return result;
+    } catch (error) {
+      lastError = error;
+      const status = error?.status || error?.httpStatusCode;
+      const msg = error?.message || "";
+      const isOverloaded = status === 503 || msg.includes("503") || msg.includes("high demand") || msg.includes("overloaded");
+
+      if (isOverloaded && modelName !== FALLBACK_MODEL) {
+        console.warn(`Model "${modelName}" is overloaded (503), trying fallback "${FALLBACK_MODEL}"...`);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+};
+
 /**
  * Generates a 3-bullet point summary of news articles for a stock
  * @param {string} stockName - Name of the stock
@@ -13,8 +47,6 @@ const genAI = new GoogleGenerativeAI(process.env.Gemini_API?.trim());
  */
 export const generateStockSummary = async (stockName, newsArticles) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-
     const articlesText = newsArticles
       .map((art, index) => `${index + 1}. Title: ${art.title}\nDescription: ${art.description || art.content || ""}`)
       .join("\n\n");
@@ -24,14 +56,14 @@ export const generateStockSummary = async (stockName, newsArticles) => {
       
       Requirements:
       1. Provide exactly 3 short, impactful bullet points.
-      2. Each bullet must start with a relevant emoji.
-      3. Use **BOLD CAPS** for key themes.
+      2. Do NOT use emojis.
+      3. Do NOT use markdown bold (** characters). Use plain UPPERCASE text for themes.
       4. Include a final "Sentiment Grade" based on the news (e.g., BULLISH, NEUTRAL, CAUTIOUS).
       
-      Format:
-      • 🚀 **THEME**: Description...
-      • 📉 **THEME**: Description...
-      • ⚠️ **THEME**: Description...
+      Format (follow this exactly, no emojis, no asterisks):
+      - THEME NAME: Description of the point...
+      - THEME NAME: Description of the point...
+      - THEME NAME: Description of the point...
       
       GRADE: [GRADE NAME]
       
@@ -39,7 +71,7 @@ export const generateStockSummary = async (stockName, newsArticles) => {
       ${articlesText}
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateWithFallback(prompt);
     const response = await result.response;
     return response.text();
   } catch (error) {
@@ -56,8 +88,6 @@ export const generateStockSummary = async (stockName, newsArticles) => {
  */
 export const generatePricePrediction = async (stockName, historicalData) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
-
     const dataText = historicalData
       .map(d => `Date: ${d.date}, Price: ${d.close}, Sentiment: ${d.sentiment || 'N/A'}`)
       .join("\n");
@@ -86,7 +116,7 @@ export const generatePricePrediction = async (stockName, historicalData) => {
       }
     `;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateWithFallback(prompt);
     const response = await result.response;
     const text = response.text().replace(/```json|```/g, "").trim();
     return JSON.parse(text);

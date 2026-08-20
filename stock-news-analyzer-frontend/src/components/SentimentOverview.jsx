@@ -19,6 +19,7 @@ const SentimentOverview = ({ stockId }) => {
   const { averageScore, distribution, label, articleCount } = latestSentiment;
   const total =
     distribution.positive + distribution.negative + distribution.neutral;
+  const pct = (value) => (total > 0 ? ((value / total) * 100).toFixed(0) : 0);
 
   const getLabelColor = () => {
     if (label === "bullish")
@@ -28,45 +29,57 @@ const SentimentOverview = ({ stockId }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div className={`border-2 rounded-lg p-4 ${getLabelColor()}`}>
-        <p className="text-sm font-medium uppercase">Today Market Mood</p>
-        <p className="text-3xl font-bold mt-2">{label}</p>
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+      <div className={`border-2 rounded-lg p-3 sm:p-4 ${getLabelColor()}`}>
+        <p className="text-[10px] sm:text-sm font-medium uppercase leading-tight">
+          Today Market Mood
+        </p>
+        <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2 capitalize break-words">
+          {label}
+        </p>
       </div>
 
-      <div className="border rounded-lg p-4">
-        <p className="text-sm text-gray-600">Today Sentiment Score</p>
+      <div className="border rounded-lg p-3 sm:p-4 bg-white border-gray-200">
+        <p className="text-[10px] sm:text-sm text-gray-600 leading-tight">
+          Today Sentiment Score
+        </p>
         <p
-          className={`text-3xl font-bold mt-2 ${averageScore >= 0 ? "text-green-600" : "text-red-600"}`}
+          className={`text-xl sm:text-3xl font-bold mt-1 sm:mt-2 ${averageScore >= 0 ? "text-green-600" : "text-red-600"}`}
         >
           {averageScore.toFixed(2)}
         </p>
       </div>
 
-      <div className="border rounded-lg p-4">
-        <p className="text-sm text-gray-600">Today Articles Analyzed</p>
-        <p className="text-3xl font-bold mt-2">{articleCount}</p>
+      <div className="border rounded-lg p-3 sm:p-4 bg-white border-gray-200">
+        <p className="text-[10px] sm:text-sm text-gray-600 leading-tight">
+          Today Articles Analyzed
+        </p>
+        <p className="text-xl sm:text-3xl font-bold mt-1 sm:mt-2 text-gray-900">
+          {articleCount}
+        </p>
       </div>
 
-      <div className="border rounded-lg p-4">
-        <p className="text-sm text-gray-600 mb-2">Today Distribution</p>
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span>Positive</span>
+      <div className="col-span-2 md:col-span-1 border rounded-lg p-3 sm:p-4 bg-white border-gray-200">
+        <p className="text-[10px] sm:text-sm text-gray-600 mb-1.5 sm:mb-2 leading-tight">
+          Today Distribution
+        </p>
+        <div className="space-y-1 text-xs sm:text-sm">
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-700">Positive</span>
             <span className="font-semibold text-green-600">
-              {((distribution.positive / total) * 100).toFixed(0)}%
+              {pct(distribution.positive)}%
             </span>
           </div>
-          <div className="flex justify-between">
-            <span>Negative</span>
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-700">Negative</span>
             <span className="font-semibold text-red-600">
-              {((distribution.negative / total) * 100).toFixed(0)}%
+              {pct(distribution.negative)}%
             </span>
           </div>
-          <div className="flex justify-between">
-            <span>Neutral</span>
+          <div className="flex justify-between gap-2">
+            <span className="text-gray-700">Neutral</span>
             <span className="font-semibold text-gray-600">
-              {((distribution.neutral / total) * 100).toFixed(0)}%
+              {pct(distribution.neutral)}%
             </span>
           </div>
         </div>

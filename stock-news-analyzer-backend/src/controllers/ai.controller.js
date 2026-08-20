@@ -58,6 +58,12 @@ export const getStockAISummary = async (req, res) => {
         error: "Rate limit exceeded"
       });
     }
+    if (errorMessage.includes("503") || errorMessage.includes("high demand") || errorMessage.includes("overloaded")) {
+      return res.status(503).json({ 
+        message: "AI model is experiencing high demand. Please try again in a few minutes.",
+        error: "Service temporarily unavailable"
+      });
+    }
 
     res.status(500).json({ message: "Error generating AI summary", error: error.message });
   }
@@ -124,6 +130,12 @@ export const getStockPricePrediction = async (req, res) => {
       return res.status(429).json({ 
         message: "AI analysis is currently paused due to high demand. Retry in a minute.",
         error: "Rate limit exceeded"
+      });
+    }
+    if (errorMessage.includes("503") || errorMessage.includes("high demand") || errorMessage.includes("overloaded")) {
+      return res.status(503).json({ 
+        message: "AI model is experiencing high demand. Please try again in a few minutes.",
+        error: "Service temporarily unavailable"
       });
     }
 
