@@ -8,6 +8,7 @@ import News from "./models/news.model.js"; // Import News model for news by date
 import mongoose from "mongoose"; // Import mongoose for ObjectId conversion
 import axios from 'axios';
 import indicesRoutes from "./routes/indicesRoutes.js"; // Import indices routes
+import { fetchIndexQuote } from "./services/yahooPrice.service.js";
 import aiRoutes from "./routes/ai.routes.js";
 import sectorRoutes from "./routes/sector.routes.js";
 
@@ -80,49 +81,43 @@ app.get("/api/news/date/:stockId/:date", async (req, res) => {
   }
 });
 
-// to get real time indices data  
+// to get real time indices data
+// NOTE: this inline route is matched before the `/api/indices` router mount
+// below, so it — not indicesController — serves GET /api/indices. The router
+// still handles the /api/indices/:name sub-route.
 app.get("/api/indices", async (req, res) => {
-  try {
-    const symbols = {
-      nifty50: "^NSEI",
-      niftyIT: "^CNXIT",
-      bankNifty: "^NSEBANK",
-      sensex: "^BSESN",
-    };
+  const symbols = {
+    nifty50: "^NSEI",
+    niftyIT: "^CNXIT",
+    bankNifty: "^NSEBANK",
+    sensex: "^BSESN",
+  };
 
-    const results = await Promise.all(
-      Object.entries(symbols).map(async ([key, symbol]) => {
-        try {
-          const response = await axios.get(
-            `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}`,
-            {
-              params: { interval: "1m", range: "1d" },
-            },
-          );
+  const results = await Promise.all(
+    Object.entries(symbols).map(async ([key, symbol]) => {
+      try {
+        const quote = await fetchIndexQuote(symbol);
+        return { name: key, ...quote };
+      } catch (error) {
+        console.error(`[Indices] ${key} failed:`, error.message);
+        return null;
+      }
+    }),
+  );
 
-          const meta = response.data.chart.result[0].meta;
-          const currentPrice = meta.regularMarketPrice;
-          const previousClose = meta.chartPreviousClose;
-          const change = currentPrice - previousClose;
-          const changePercent = (change / previousClose) * 100;
+  const data = results.filter(Boolean);
 
-          return {
-            name: key,
-            value: currentPrice,
-            change,
-            changePercent,
-          };
-        } catch (error) {
-          console.error(`Error fetching ${key}:`, error.message);
-          return null;
-        }
-      }),
-    );
-
-    res.json(results.filter(Boolean));
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch indices" });
+  // Returning an empty array with a 200 made a total upstream failure look
+  // like "no indices exist", which rendered an empty ticker bar with no clue
+  // why. Say so explicitly instead.
+  if (data.length === 0) {
+    return res.status(503).json({
+      error: "Market data provider unavailable",
+      details: "No index quotes could be fetched",
+    });
   }
+
+  res.json(data);
 });
 
 // Health check endpoint

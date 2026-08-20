@@ -77,7 +77,7 @@ const DarkLiveIndicesTicker = ({ isMobile }) => {
         const res = await fetch(`${BASE_URL}/api/indices`);
         if (!res.ok) return;
         const data = await res.json();
-        setIndices(data);
+        setIndices(Array.isArray(data) ? data : []);
       } catch (_) {}
     };
     fetchIndices();

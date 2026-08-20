@@ -10,9 +10,11 @@ const SlimIndicesTicker = () => {
     const fetchIndices = async () => {
       try {
         const response = await fetch(`${BASE_URL}/api/indices`);
-        if (!response.ok) throw new Error("Failed to fetch data");
+        if (!response.ok) throw new Error("Market data unavailable");
         const data = await response.json();
-        setIndices(data);
+        // A non-array payload (an error object) would blow up .map() below.
+        setIndices(Array.isArray(data) ? data : []);
+        setError(null);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -76,6 +78,10 @@ const SlimIndicesTicker = () => {
         Error: {error}
       </div>
     );
+
+  // With no items the container still painted its padding, gradient and border,
+  // leaving an unexplained empty strip above the dashboard.
+  if (!indices.length) return null;
 
   return (
     <div className="bg-gradient-to-r from-gray-50 via-white to-gray-50 border-b-2 border-gray-200 shadow-md overflow-hidden">

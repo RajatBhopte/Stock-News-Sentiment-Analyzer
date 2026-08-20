@@ -54,4 +54,46 @@ export const fetchDailySeries = async (symbol, days) => {
   return { timestamps: result.timestamp, quotes: result.indicators.quote[0] };
 };
 
+/**
+ * Fetches the current quote for an index symbol (e.g. "^NSEI") from the chart
+ * endpoint's meta block.
+ * @param {string} symbol - Yahoo symbol, caret prefix included
+ * @returns {Promise<{value:number, change:number, changePercent:number, previousClose:number}>}
+ */
+export const fetchIndexQuote = async (symbol) => {
+  let data;
+  try {
+    ({ data } = await axios.get(
+      `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}`,
+      {
+        params: { interval: "1m", range: "1d" },
+        headers: { "User-Agent": BROWSER_UA, Accept: "application/json" },
+        timeout: 15000,
+      },
+    ));
+  } catch (error) {
+    const status = error.response?.status ?? null;
+    throw new PriceProviderError(
+      `Yahoo quote failed for ${symbol}${status ? ` (${status})` : ""}: ${error.message}`,
+      { status, throttled: status === 429 },
+    );
+  }
+
+  const meta = data?.chart?.result?.[0]?.meta;
+  if (!meta || typeof meta.regularMarketPrice !== "number") {
+    throw new PriceProviderError(`No quote data for ${symbol}`, { status: 502 });
+  }
+
+  const value = meta.regularMarketPrice;
+  const previousClose = meta.chartPreviousClose ?? value;
+  const change = value - previousClose;
+
+  return {
+    value,
+    previousClose,
+    change,
+    changePercent: previousClose ? (change / previousClose) * 100 : 0,
+  };
+};
+
 export { PriceProviderError };
